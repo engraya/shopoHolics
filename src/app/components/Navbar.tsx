@@ -13,7 +13,7 @@ const navigation = [
   { name: 'Products', href: '/products' },
   { name: 'Categories', href: '/categories' },
   { name: 'Reviews', href: '#' },
-  { name: 'Company', href: '#' },
+  { name: 'Store', href: '#' },
 ]
 
 function Navbar() {
@@ -23,15 +23,16 @@ function Navbar() {
         <nav className="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
           <div className="flex lg:flex-1">
             <Link href="/" className="-m-1.5 p-1.5">
-              <span className="sr-only">Shopoholics</span>
-              <Image
+            <Image
               src={logo}
               height={50}
               width={50}
               alt="logo"
               />
             </Link>
+            <span className="text-black font-extrabold mt-4 mx-2">Shopoholics</span>
           </div>
+          
           <div className="flex lg:hidden">
             <button
               type="button"
@@ -63,7 +64,6 @@ function Navbar() {
             <h1  className="text-xl mt-1 font-semibold leading-6 text-gray-900">
               0
             </h1>
-
           </div>
         </nav>
         <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
@@ -102,13 +102,20 @@ function Navbar() {
                   ))}
                 </div>
                 <div className="py-6">
-                  <a
-                    href="#"
-                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                  >
-                    Log in
-                  </a>
-                  
+                  <div className='flex'>
+                  <Link href="/">
+                    <Image
+                      src={cart}
+                      height={40}
+                      width={40}
+                      alt="cart"
+                      className='mx-3'
+                    />
+                  </Link>
+                  <h1  className="text-xl mt-1 font-semibold leading-6 text-gray-900">
+                    0
+                  </h1>
+                  </div>
                 </div>
               </div>
             </div>
