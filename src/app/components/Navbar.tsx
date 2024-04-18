@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from 'react'
-import { Dialog } from '@headlessui/react'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import { RxDropdownMenu } from "react-icons/rx";
 import Image from 'next/image'
 import logo from "@public/assets/logo.png"
 import Link from 'next/link'
@@ -40,7 +39,8 @@ function Navbar() {
               onClick={() => setMobileMenuOpen(true)}
             >
               <span className="sr-only">Open main menu</span>
-              <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+              {/* <Bars3Icon className="h-6 w-6" aria-hidden="true" /> */}
+              <RxDropdownMenu className="h-6 w-6" aria-hidden="true" />
             </button>
           </div>
           <div className="hidden lg:flex lg:gap-x-12">
@@ -66,61 +66,6 @@ function Navbar() {
             </h1>
           </div>
         </nav>
-        <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
-          <div className="fixed inset-0 z-50" />
-          <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
-            <div className="flex items-center justify-between">
-            <Link href="/" className="-m-1.5 p-1.5 flex">
-              <Image
-              src={logo}
-              height={50}
-              width={50}
-              alt="logo"
-              />
-            </Link>
-            <span className="text-black font-extrabold mt-4">Shopoholics</span>
-              <button
-                type="button"
-                className="-m-2.5 rounded-md p-2.5 text-gray-700"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span className="sr-only">Close menu</span>
-                <XMarkIcon className="h-6 w-6" aria-hidden="true" />
-              </button>
-            </div>
-            <div className="mt-6 flow-root">
-              <div className="-my-6 divide-y divide-gray-500/10">
-                <div className="space-y-2 py-6">
-                  {navigation.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                    >
-                      {item.name}
-                    </a>
-                  ))}
-                </div>
-                <div className="py-6">
-                  <div className='flex'>
-                  <Link href="/">
-                    <Image
-                      src={cart}
-                      height={40}
-                      width={40}
-                      alt="cart"
-                      className='mx-3'
-                    />
-                  </Link>
-                  <h1  className="text-xl mt-1 font-semibold leading-6 text-gray-900">
-                    0
-                  </h1>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Dialog.Panel>
-        </Dialog>
       </header>
 
   )

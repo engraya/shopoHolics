@@ -1,12 +1,6 @@
-import image1 from "@public/assets/heroImages/1.jpg"
-import image2 from "@public/assets/heroImages/2.jpg"
-import image3 from "@public/assets/heroImages/3.jpg"
-import image4 from "@public/assets/heroImages/4.jpg"
-import image5 from "@public/assets/heroImages/5.jpg"
-import image6 from "@public/assets/heroImages/6.jpg"
-import image7 from "@public/assets/heroImages/7.jpg"
-import Image from "next/image"
+import LandingPageCollections from "./components/LandingPageCollections";
 import Link from "next/link"
+import SquigglyLines from "./components/SquigglyLines"
 
 export default function Home() {
 
@@ -23,9 +17,13 @@ export default function Home() {
       </div>
     </div>
     <div className="text-center">
-      <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-        Data to enrich your online business
-      </h1>
+    <h4 className="mx-auto max-w-4xl font-display text-3xl font-bold tracking-normal text-slate-900 sm:text-5xl">
+      Data to enrich your online business with{' '}
+          <span className="relative whitespace-nowrap text-[#7166da]">
+            <SquigglyLines />
+            <span className="relative">Shopoholics</span>
+          </span>{' '}
+        </h4>
       <p className="mt-6 text-lg leading-8 text-gray-600">
         Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo. Elit sunt amet
         fugiat veniam occaecat fugiat aliqua.
@@ -63,78 +61,7 @@ export default function Home() {
             className="pointer-events-none lg:absolute lg:inset-y-0 lg:mx-auto lg:w-full lg:max-w-7xl"
           >
             <div className="absolute transform sm:left-1/2 sm:top-0 sm:translate-x-8 lg:left-1/2 lg:top-1/2 lg:-translate-y-1/2 lg:translate-x-8">
-              <div className="flex items-center space-x-6 lg:space-x-8">
-                <div className="grid flex-shrink-0 grid-cols-1 gap-y-6 lg:gap-y-8">
-                  <div className="h-64 w-44 overflow-hidden rounded-lg sm:opacity-0 lg:opacity-100">
-                    <Image
-                    src={image1}
-                    height={39}
-                    width={39}
-                    alt="Image1"
-                    className="h-full w-full object-cover object-center"
-                    />
-                  </div>
-                  <div className="h-64 w-44 overflow-hidden rounded-lg">
-                  <Image
-                    src={image2}
-                    height={39}
-                    width={39}
-                    alt="Image2"
-                    className="h-full w-full object-cover object-center"
-                    />
-       
-                  </div>
-                </div>
-                <div className="grid flex-shrink-0 grid-cols-1 gap-y-6 lg:gap-y-8">
-                  <div className="h-64 w-44 overflow-hidden rounded-lg">
-                  <Image
-                    src={image3}
-                    height={39}
-                    width={39}
-                    alt="Image3"
-                    className="h-full w-full object-cover object-center"
-                    />
-                  </div>
-                  <div className="h-64 w-44 overflow-hidden rounded-lg">
-                  <Image
-                    src={image4}
-                    height={39}
-                    width={39}
-                    alt="Image4"
-                    className="h-full w-full object-cover object-center"
-                    />
-                  </div>
-                  <div className="h-64 w-44 overflow-hidden rounded-lg">
-                  <Image
-                    src={image5}
-                    height={39}
-                    width={39}
-                    alt="Image5"
-                    className="h-full w-full object-cover object-center"
-                    />
-                  </div>
-                </div>
-                <div className="grid flex-shrink-0 grid-cols-1 gap-y-6 lg:gap-y-8">
-                  <div className="h-64 w-44 overflow-hidden rounded-lg">
-                  <Image
-                    src={image6}
-                    height={39}
-                    width={39}
-                    alt="Image6"
-                    className="h-full w-full object-cover object-center"
-                    />
-                  </div>
-                  <div className="h-64 w-44 overflow-hidden rounded-lg">
-                  <Image
-                    src={image7}
-                    height={39}
-                    width={39}
-                    alt="Image7"
-                    className="h-full w-full object-cover object-center"
-                    />
-                  </div>
-                </div>
-              </div>
+           <LandingPageCollections/>
             </div>
           </div>
 
