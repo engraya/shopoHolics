@@ -1,4 +1,14 @@
-import React from 'react'
+"use client"
+import { urlFor } from "../lib/sanity";
+
+export interface ProductCart {
+  name: string;
+  description: string;
+  price: number;
+  currency: string;
+  image: any;
+  price_id: string;
+}
 
 function AddToCart() {
   return (

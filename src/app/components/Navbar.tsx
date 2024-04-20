@@ -11,8 +11,7 @@ import cart from "@public/assets/cart.png"
 const navigation = [
   { name: 'Products', href: '/products' },
   { name: 'Categories', href: '/categories' },
-  { name: 'Reviews', href: '#' },
-  { name: 'Store', href: '#' },
+  { name: 'Newest', href: '/newest' },
 ]
 
 function Navbar() {
@@ -29,7 +28,10 @@ function Navbar() {
               alt="logo"
               />
             </Link>
-            <span className="text-black font-extrabold mt-4 mx-2">Shopoholics</span>
+            <Link href="/" className='mt-3'>
+            <span className="text-black font-extrabold mx-2">Shopoholics</span>
+            </Link>
+     
           </div>
           
           <div className="flex lg:hidden">
