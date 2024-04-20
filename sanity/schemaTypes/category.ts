@@ -8,5 +8,11 @@ export default {
         title: 'Name of Category',
         type: 'string',
       },
+      {
+        name: 'images',
+        type: 'array',
+        title: 'Product Images',
+        of: [{type: 'image'}],
+      },
     ],
   }
