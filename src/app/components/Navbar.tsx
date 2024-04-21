@@ -12,6 +12,9 @@ const navigation = [
   { name: 'Products', href: '/products' },
   { name: 'Categories', href: '/categories' },
   { name: 'Newest', href: '/newest' },
+  { name: 'Reports', href: '/reports' },
+  { name: 'Reviews', href: '/reviews' },
+  { name: 'Checkout', href: '/checkout' },
 ]
 
 function Navbar() {
@@ -54,7 +57,7 @@ function Navbar() {
           </div>
           
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          <Link href="/">
+          <Link href="/cart">
               <Image
               src={cart}
               height={40}
