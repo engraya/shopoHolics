@@ -4,6 +4,9 @@ import { fullProduct } from "@src/app/interface";
 import ImageGallery from "@src/app/components/ImageGallery";
 import { Truck } from "lucide-react";
 import Link from "next/link";
+import AddToBag from "@src/app/components/AddToCart";
+
+
 
 async function getProductDetailData(slug: string) {
   const query = `*[_type == "product" && slug.current == "${slug}"][0] {
@@ -233,7 +236,16 @@ async function page({
               </div>
             </fieldset>
           </div>
-          <button type="submit" className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Add to bag</button>
+          <AddToBag
+            currency="USD"
+            description={product.description}
+            image={product.images[0]}
+            name={product.name}
+            price={product.price}
+            key={product._id}
+            price_id={product.price_id} 
+            className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          />
           <button type="submit" className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-green-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Checkout</button>
         </form>
     
