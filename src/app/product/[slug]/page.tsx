@@ -52,7 +52,7 @@ async function page({
 
         <nav aria-label="Breadcrumb">
           <div className="mx-auto flex max-w-2xl items-center space-x-2 px-4 sm:px-6 lg:max-w-7xl lg:px-8">
-              <div aria-current="page" className="font-medium text-gray-500 hover:text-gray-600">
+              <div aria-current="page" className="font-bold text-xl text-gray-900 hover:text-gray-600">
                 {product.name}
               </div>
           </div>

@@ -33,29 +33,48 @@ async function Products() {
 
   const products = await getProducts();
   return (
-<div>
-      <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
-        <h2 className="text-black text-3xl text-center font-bold justify-center flex mb-6">Products</h2>
-
-        <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xl:gap-x-8">
-          {products.map((product : Product) => (
-            <Link key={product.id} href={`/product/${product.slug}`} className="group">
-              <div className="w-full overflow-hidden object-cover object-center rounded-lg bg-gray-200">
-                <Image
+    <section className="py-12 text-gray-700 sm:py-16 lg:py-20">
+    <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-md text-center">
+        <h2 className="font-serif text-2xl font-bold sm:text-3xl">Popular Products</h2>
+      </div>
+      <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-4 sm:gap-4 lg:mt-16">
+        {products.map((product : Product) => (
+          <Link key={product.id} href={`/product/${product.slug}`} className="group">
+        <article className="relative flex flex-col overflow-hidden rounded-lg border">
+          <div className="aspect-square overflow-hidden">
+            <Image
                 src={urlFor(product.images[0]).url()}
                  alt="product image"
                  width={70}
                  height={70}
-                 className="h-full w-full object-cover object-center group-hover:opacity-75"
+                 className="h-full w-full object-cover transition-all duration-300 group-hover:scale-125"
                 />
-              </div>
-              <h3 className="mt-4 text-sm text-gray-700">{product.name}</h3>
-              <p className="mt-1 text-lg font-medium text-gray-900">  ₦ {product.price}</p>
-            </Link>
-          ))}
-        </div>
+          </div>
+          <div className="absolute top-0 m-2 rounded-full bg-green-600">
+            <p className="rounded-full bg-emerald-500 p-1 text-[8px] font-bold uppercase tracking-wide text-white sm:py-1 sm:px-3">Sale</p>
+          </div>
+          <div className="my-4 mx-auto flex w-10/12 flex-col items-start justify-between">
+            <div className="mb-2 flex">
+              <p className="mr-3 text-sm font-semibold">₦ {product.price}</p>
+              <del className="text-xs text-gray-400">  ₦ 79.00 </del> 
+            </div>
+            <h3 className="mb-2 text-sm text-gray-400">{product.name}</h3>
+          </div>
+          <button className="group mx-auto mb-2 flex h-10 w-10/12 items-stretch overflow-hidden rounded-md text-gray-600">
+            <div className="flex w-full items-center justify-center bg-green-600 text-white text-xs uppercase transition group-hover:bg-emerald-600 group-hover:text-white">Add</div>
+            <div className="flex items-center justify-center bg-gray-200 px-5 transition group-hover:bg-emerald-500 group-hover:text-white">+</div>
+          </button> 
+        </article>
+          </Link>
+        ))}
+     
       </div>
     </div>
+  </section>
+
+    
+    
   )
 }
 

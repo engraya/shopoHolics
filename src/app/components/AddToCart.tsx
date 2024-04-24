@@ -21,7 +21,7 @@ export default function AddToBag({
   price,
   price_id,
 }: ProductCart) {
-  const { addItem, handleCartClick } = useShoppingCart();
+  // const { addItem, handleCartClick } = useShoppingCart();
 
   const product = {
     name: name,
@@ -33,9 +33,9 @@ export default function AddToBag({
   };
   return (
     <AddItemButton
-      onClick={() => {
-        addItem(product), handleCartClick();
-      }}
+      // onClick={() => {
+      //   addItem(product), handleCartClick();
+      // }}
     >
       Add To Cart
     </AddItemButton>
