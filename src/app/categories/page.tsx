@@ -10,7 +10,7 @@ interface Category {
 }
 
 
-  export async function getCategories() {
+async function getCategories() {
 
     const query = `*[_type == "category"]{
       _id,
