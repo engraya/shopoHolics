@@ -26,9 +26,9 @@ export default function Home() {
     </div>
     <div className="text-center ">
       <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-slate-200 sm:text-5xl md:text-6xl">
-        <span className="block xl:inline"><span className="mb-1 block">Discover Your Next Obsession" or</span>
+        <span className="block xl:inline"><span className="mb-1 block">Discover Your Next Obsession or</span>
           <span className="bg-gradient-to-r from-indigo-400 to-pink-600 bg-clip-text text-transparent">
-          "Shop Smart, Shop
+          Shop Smart, Shop
           </span>
         </span>
         <div className="mt-2">Fast { ""}

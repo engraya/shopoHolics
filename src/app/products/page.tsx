@@ -43,7 +43,7 @@ async function Products() {
       </div>
       <div className="mt-6 grid grid-cols-2 gap-6 sm:grid-cols-4 sm:gap-4 lg:mt-16">
         {products.map((product : Product) => (
-        <article className="relative flex flex-col overflow-hidden rounded-lg border">
+        <article key={product.id}  className="relative flex flex-col overflow-hidden rounded-lg border">
           <Link key={product.id} href={`/product/${product.slug}`}>
           <div className="aspect-square overflow-hidden">
             <Image

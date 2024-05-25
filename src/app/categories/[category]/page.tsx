@@ -18,8 +18,6 @@ async function getData(cateogry: string) {
   return data;
 }
 
-export const dynamic = "force-dynamic";
-
   
 async function Categories({
     params,
@@ -49,8 +47,7 @@ async function Categories({
       <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-4 sm:gap-4 lg:mt-16">
    
       {data.map((product) => (
-
-        <article className="relative flex flex-col overflow-hidden rounded-lg border">
+        <article key={product.slug} className="relative flex flex-col overflow-hidden rounded-lg border">
          <Link key={product.slug} href={`/product/${product.slug}`} className="group">
           <div className="aspect-square overflow-hidden">
             <Image
