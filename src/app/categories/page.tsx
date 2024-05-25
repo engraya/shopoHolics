@@ -51,7 +51,6 @@ async function Categories() {
               </h3>
             </div>
             </Link>
-     
           ))}
         </div>
       </div>

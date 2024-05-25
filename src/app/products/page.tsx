@@ -12,9 +12,9 @@ interface Product {
   slug : string
   price_id : string
 }
+  
 
-
-  export async function getProducts() {
+async function getProducts() {
 
     const query = `*[_type == "product"] {
       _id,
