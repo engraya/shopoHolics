@@ -25,7 +25,6 @@ async function getProductDetailData(slug: string) {
   return data;
 }
 
-export const dynamic = "force-dynamic";
 
 
 
