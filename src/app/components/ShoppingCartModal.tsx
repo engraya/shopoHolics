@@ -7,7 +7,6 @@ import AddItemButton from "./ui/AddItemButton";
 function ShoppingCartModal() {
     const {
         cartCount,
-        shouldDisplayCart,
         handleCartClick,
         cartDetails,
         removeItem,
