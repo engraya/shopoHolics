@@ -1,8 +1,8 @@
 "use client";
 
-import { useShoppingCart } from "use-shopping-cart";
-import { urlFor } from "../lib/sanity";
 import { Button } from "@/components/ui/button";
+import { useShoppingCart } from "use-shopping-cart";
+import { urlFor } from "@src/app/lib/sanity";
 
 export interface ProductCart {
   name: string;
@@ -13,7 +13,7 @@ export interface ProductCart {
   price_id: string;
 }
 
-export default function AddToBag({
+export default function AddToCart({
   currency,
   description,
   image,

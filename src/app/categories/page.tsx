@@ -29,8 +29,8 @@ async function Categories() {
   return (
     <div>
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-2xl py-16 sm:py-24 lg:max-w-none lg:py-32">
-        <h2 className="text-3xl font-bold text-gray-900 flex justify-center text-center">Product Categories</h2>
+      <div className="mx-auto max-w-2xl py-16 sm:py-24 lg:max-w-none lg:py-28">
+      <h2 className="text-3xl text-center font-extrabold text-gray-900 bg-gradient-to-r from-indigo-400 to-pink-600 bg-clip-text text-transparent sm:text-4xl md:text-4xl">Popular Categories</h2>
         <div className="mt-6 space-y-12 lg:grid lg:grid-cols-3 lg:gap-x-6 lg:space-y-0">
           {categories.map((category : Category) => (
             <Link href={`/categories/${category.name}`}>
@@ -44,7 +44,7 @@ async function Categories() {
                   height={300}
                 />
               </div>
-              <h3 className="mt-3 text-xl text-gray-900 font-bold flex justify-center items-center">
+              <h3 className="mt-3 text-xl text-gray-900 dark:text-slate-100 font-bold flex justify-center items-center">
                   <span className="absolute inset-0" />
                   {category.name}
               </h3>

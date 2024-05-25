@@ -2,7 +2,7 @@ import Link from "next/link";
 import { simplifiedProduct } from "../../interface";
 import { client } from "../../lib/sanity";
 import Image from "next/image";
-
+import AddToCart from "@src/app/components/AddToCart/AddToCart";
 async function getData(cateogry: string) {
   const query = `*[_type == "product" && category->name == "${cateogry}"] {
         _id,
@@ -19,7 +19,6 @@ async function getData(cateogry: string) {
 }
 
 export const dynamic = "force-dynamic";
-
 
   
 async function Categories({
@@ -45,13 +44,14 @@ async function Categories({
       </Link>
     </nav>
       <div className="mx-auto max-w-md text-center">
-        <h2 className="font-serif text-3xl font-bold sm:text-3xl">{params.category}</h2>
+      <h2 className="text-3xl text-center font-ebold text-gray-900 bg-gradient-to-r from-indigo-400 to-pink-600 bg-clip-text text-transparent sm:text-4xl md:text-4xl">Products for {params.category}</h2>
       </div>
       <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-4 sm:gap-4 lg:mt-16">
    
       {data.map((product) => (
-          <Link key={product.slug} href={`/product/${product.slug}`} className="group">
+
         <article className="relative flex flex-col overflow-hidden rounded-lg border">
+         <Link key={product.slug} href={`/product/${product.slug}`} className="group">
           <div className="aspect-square overflow-hidden">
             <Image
                  src={product.imageUrl}
@@ -74,12 +74,21 @@ async function Categories({
             <h3 className="mb-2 text-sm text-gray-400">{product.name}</h3>
             </Link>
           </div>
-          <button className="group mx-auto mb-2 flex h-10 w-10/12 items-stretch overflow-hidden rounded-md text-gray-600">
-            <div className="flex w-full items-center justify-center bg-green-600 text-white text-xs uppercase transition group-hover:bg-emerald-600 group-hover:text-white">Add</div>
-            <div className="flex items-center justify-center bg-gray-200 px-5 transition group-hover:bg-emerald-500 group-hover:text-white">+</div>
-          </button> 
-        </article>
           </Link>
+          <div className="group mx-auto mb-2 flex h-10 items-stretch overflow-hidden rounded-md text-gray-600">
+            <AddToCart
+            currency="USD"
+            description={""}
+            image={product.imageUrl}
+            name={product.name}
+            price={product.price}
+            key={product.slug}
+            price_id={""}
+            
+            />
+          </div> 
+        </article>
+
         ))}
      
       </div>

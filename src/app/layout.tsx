@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import { ThemeProvider } from "@components/ThemeProvider/ThemeProvider";
+import CartProvider from "./components/Providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,8 +21,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <CartProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+                >
         <Navbar/>
-        <div className="bg-white pt-12">
+        <div className="pt-12">
       <div className="relative isolate px-6 lg:px-8">
         <div
           className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
@@ -49,9 +58,11 @@ export default function RootLayout({
         </div>
       </div>
     </div>
-   
+    <Footer/>
+        </ThemeProvider>
+        </CartProvider>
+  
       </body>
-      <Footer/>
     </html>
   );
 }

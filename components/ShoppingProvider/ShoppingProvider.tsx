@@ -1,11 +1,11 @@
 "use client";
 
 import { ReactNode } from "react";
-import { CartProvider as USCProvider } from "use-shopping-cart";
+import { CartProvider } from "use-shopping-cart";
 
-export default function CartProvider({ children }: { children: ReactNode }) {
+export default function ShoppingProvider({ children }: { children: ReactNode }) {
   return (
-    <USCProvider
+    <CartProvider
       mode="payment"
       cartMode="client-only"
       stripe={process.env.NEXT_PUBLIC_STRIPE_KEY as string}
@@ -17,6 +17,6 @@ export default function CartProvider({ children }: { children: ReactNode }) {
       language="en-US"
     >
       {children}
-    </USCProvider>
+    </CartProvider>
   );
 }
