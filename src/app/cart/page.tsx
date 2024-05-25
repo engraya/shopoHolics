@@ -14,6 +14,7 @@ function CartPage() {
     incrementItem,
     totalPrice,
     redirectToCheckout,
+    clearCart,
   } = useShoppingCart();
 
 
@@ -21,12 +22,15 @@ function CartPage() {
     event.preventDefault();
     try {
       const result = await redirectToCheckout();
-      if (result?.error) {
-        console.log("result");
+      if (!result?.error) {
+        clearCart();
+      } else {
+        console.error("Checkout error:", result.error);
       }
     } catch (error) {
-      console.log(error);
-    }
+      console.error("Checkout failed:", error);
+    } 
+    clearCart();
   }
   return (
     <PageContainer>

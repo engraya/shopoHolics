@@ -1,6 +1,14 @@
 import LandingPageCollections from "./components/LandingPageCollections";
 import Link from "next/link"
+
+
+// Opt out of caching for all data requests in the route segment
+export const dynamic = 'force-dynamic'
+
+
 export default function Home() {
+
+
 
   return (
     <>

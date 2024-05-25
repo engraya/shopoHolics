@@ -11,8 +11,8 @@ function SuccessPage() {
       </path>
     </svg>
     <div className="text-center">
-      <h3 className="md:text-2xl text-base text-gray-900 font-semibold text-center">Payment Successful!</h3>
-      <p className="text-gray-600 my-2">Thank you for completing your secure online payment.</p>
+      <h3 className="md:text-2xl text-base text-gray-900 dark:text-slate-100 font-semibold text-center">Payment Successful!</h3>
+      <p className="text-gray-600 my-2 dark:text-slate-100">Thank you for completing your secure online payment.</p>
       <p> Have a great day!</p>
       <Link href="/">
       <div className="py-10 text-center flex justify-center items-center">

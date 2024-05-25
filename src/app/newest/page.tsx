@@ -7,6 +7,9 @@ import Image from "next/image";
 import AddToCart from '../components/AddToCart/AddToCart';
 
 
+// Opt out of caching for all data requests in the route segment
+export const dynamic = 'force-dynamic'
+
 async function getNewestProductData() {
   const query = `*[_type == "product"][0...4] | order(_createdAt desc) {
         _id,
