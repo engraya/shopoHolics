@@ -8,8 +8,11 @@ import Link from 'next/link';
 import cart from "@public/assets/cart.png";
 import { ThemeToggler } from '@components/ThemeToggler/ThemeToggler';
 import { useShoppingCart } from "use-shopping-cart";
+import { CardSheet } from './CardSheet';
+
 
 const navigation = [
+  { name: 'Home', href: '/' },
   { name: 'Products', href: '/products' },
   { name: 'Categories', href: '/categories' },
   { name: 'Newest', href: '/newest' },
@@ -58,20 +61,8 @@ function Navbar() {
         </div>
 
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          <Link href="/cart">
-            <Image
-              src={cart}
-              height={40}
-              width={40}
-              alt="cart"
-              className='mx-3'
-            />
-          </Link>
-          <h3 className="text-xl mt-1 font-semibold leading-6 text-gray-900 dark:text-slate-100">
-            {cartCount}
-          </h3>
         </div>
-
+        <CardSheet/>
         <div className='ml-4'>
           <ThemeToggler />
         </div>
