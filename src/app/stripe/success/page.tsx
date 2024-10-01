@@ -17,7 +17,7 @@ function SuccessPage() {
   useEffect(() => {
     clearCart();
     runFireworks();
-  }, []);
+  }, [clearCart]);
 
   return (
     <PageContainer>

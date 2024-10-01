@@ -62,7 +62,7 @@ export function CardSheet() {
               {cartCount === 0 ? (
                 <div className="flex items-center justify-center">
                   <h1 className="text-2xl font-semibold text-gray-900 dark:text-slate-100">
-                    You Don't Have Items in Cart
+                    You Don&apos;t Have Items in Cart
                   </h1>
                 </div>
               ) : (
