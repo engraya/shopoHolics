@@ -61,7 +61,7 @@ function CartPage() {
                       <div className="sm:col-gap-5 sm:grid sm:grid-cols-2">
                         <div className="pr-8 sm:pr-5">
                           <p className="text-base font-semibold text-gray-900 dark:text-slate-100">{entry.name}</p>
-                          <p className="mx-0 mt-1 mb-0 text-sm text-gray-400 dark:text-slate-100">${entry.price}</p>
+                          <p className="mx-0 mt-1 mb-0 text-sm text-gray-900 dark:text-slate-100">${entry.price}</p>
                         </div>
                         <div className="mt-4 flex items-end justify-between sm:mt-0 sm:items-start sm:justify-end">
                           <p className="shrink-0 w-20 text-base font-semibold text-gray-900 dark:text-slate-100 sm:order-2 sm:ml-8 sm:text-right">${entry.quantity * entry.price}</p>
@@ -93,13 +93,13 @@ function CartPage() {
                 </div>
                 <div className="mt-6 border-t border-b py-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-400 dark:text-cyan-100">Subtotal</p>
+                    <p className="text-sm text-gray-900 dark:text-slate-100">Subtotal</p>
                     <p className="text-lg font-semibold text-gray-900 dark:text-cyan-100">${totalPrice}</p>
                   </div>
                 </div>
                 <div className="mt-6 flex items-center justify-between">
-                  <p className="text-xl font-bold text-gray-900 dark:text-cyan-100">Total</p>
-                  <p className="text-2xl font-semibold text-gray-900 dark:text-cyan-100"><span className="text-xs font-normal text-gray-400"></span>${totalPrice}</p>
+                  <p className="text-xl font-boldtext-gray-900 dark:text-slate-100">Total</p>
+                  <p className="text-2xl font-semibold text-gray-900 dark:text-slate-100"><span className="text-xs font-normal text-gray-400"></span>${totalPrice}</p>
                 </div>
                 <div className="mt-6 my-3 text-center">
                   <button type="button" onClick={handleCheckoutClick} className="group mb-2 inline-flex w-full items-center justify-center rounded-md bg-gray-900 px-6 py-4 text-lg font-semibold text-white transition-all duration-200 ease-in-out focus:shadow hover:bg-gray-800">
