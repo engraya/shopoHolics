@@ -7,13 +7,15 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 interface CartLineItem {
-  price_id: string;
+  name: string;
+  price: number;
+  currency: string;
   quantity: number;
 }
 
 export async function POST(req: Request) {
   try {
-    const session = await auth();
+    const session = await auth().catch(() => null);
     const { items }: { items: CartLineItem[] } = await req.json();
 
     if (!items || items.length === 0) {
@@ -26,7 +28,11 @@ export async function POST(req: Request) {
       payment_method_types: ["card"],
       mode: "payment",
       line_items: items.map((item) => ({
-        price: item.price_id,
+        price_data: {
+          currency: item.currency.toLowerCase(),
+          unit_amount: Math.round(item.price * 100),
+          product_data: { name: item.name },
+        },
         quantity: item.quantity,
       })),
       success_url: `${baseUrl}/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
