@@ -1,90 +1,35 @@
-import Link from "next/link"
-import { client } from "../lib/sanity" 
-import Image from "next/image"
-import { urlFor } from "../lib/sanity";
-import AddToCart from "../components/AddToCart/AddToCart";
+import { getAllProducts, PRODUCTS_REVALIDATE } from "@/lib/api/queries"
+import ProductCard from "@/features/products/components/ProductCard"
 
-interface Product {
-  name : string
-  id : string
-  price : number
-  images : string[]
-  slug : string
-  price_id : string
-}
-  
+export const revalidate = PRODUCTS_REVALIDATE;
 
-async function getProducts() {
+export default async function ProductsPage() {
+  const products = await getAllProducts();
 
-    const query = `*[_type == "product"] {
-      _id,
-        price,
-        price_id,
-        images,
-      name,
-        "slug": slug.current,
-        "categoryName": category->name,
-        "imageUrl": images[0].asset->url
-    }`;
-
-    const products = await client.fetch(query); 
-  
-    return products
-  }
-
-async function Products() {
-
-  const products = await getProducts();
   return (
-    <section className="py-12 text-gray-700 sm:py-16 lg:py-20">
-    <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
-      <div className="text-center">
-        <h2 className="text-3xl font-extrabold text-gray-900 bg-gradient-to-r from-indigo-400 to-pink-600 bg-clip-text text-transparent sm:text-4xl md:text-4xl">Popular Products</h2>
-      </div>
-      <div className="mt-6 grid grid-cols-2 gap-6 sm:grid-cols-4 sm:gap-4 lg:mt-16">
-        {products.map((product : Product) => (
-        <article key={product.id}  className="relative flex flex-col overflow-hidden rounded-lg border">
-          <Link key={product.id} href={`/product/${product.slug}`}>
-          <div className="aspect-square overflow-hidden">
-            <Image
-                src={urlFor(product.images[0]).url()}
-                 alt="product image"
-                 width={70}
-                 height={70}
-                 className="h-full w-full object-cover transition-all duration-300 group-hover:scale-125"
-                />
+    <section className="py-6 sm:py-8 lg:py-10">
+      <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground sm:text-4xl">All Products</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{products.length} products</p>
           </div>
-          <div className="absolute top-0 m-2 rounded-full bg-green-600">
-            <p className="rounded-full bg-emerald-500 p-1 text-[8px] font-bold uppercase tracking-wide text-white sm:py-1 sm:px-3">Sale</p>
+          <div className="flex items-center gap-2">
+            <select className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm focus:ring-2 focus:ring-ring focus:outline-none">
+              <option>Sort: Featured</option>
+              <option>Price: Low to High</option>
+              <option>Price: High to Low</option>
+              <option>Newest First</option>
+            </select>
           </div>
-          <div className="my-1 mx-auto flex w-10/12 flex-col items-start justify-around dark:text-slate-100">
-            <div className="mb-2 flex justify-between  dark:text-slate-100">
-              <p className="mr-3 text-md whitespace-nowrap font-bold  dark:text-slate-100">₦ {product.price}</p>
-              <del className="text-xs text-red-600  dark:text-pink-500">₦{product.price * 0.65}</del> 
-            </div>
-            <h3 className="mb-2 text-md text-gray-800  dark:text-slate-100">{product.name}</h3>
-          </div>
-          </Link>
-          <div className="mx-auto mb-2 flex h-10 items-stretch overflow-hidden rounded-md text-gray-600">
-            <AddToCart
-              currency="USD"
-              description={""}
-              image={product.images[0]}
-              name={product.name}
-              price={product.price}
-              key={product.id}
-              price_id={product.price_id}
-            />
-          </div> 
-        </article>
-        ))}
-      </div>
-    </div>
-  </section>
+        </div>
 
-    
-    
-  )
+        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+          {products.map((product) => (
+            <ProductCard key={product._id} product={product} badgeLabel="Sale" />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
-
-export default Products

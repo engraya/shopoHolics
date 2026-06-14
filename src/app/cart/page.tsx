@@ -1,11 +1,16 @@
 "use client";
 
-import PageContainer from "../components/PageContainer"
+import PageContainer from "@/components/layout/PageContainer"
 import Link from "next/link"
 import Image from "next/image";
 import { useShoppingCart } from "use-shopping-cart";
+import { formatPrice } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ArrowRight, X } from "lucide-react";
 
-function CartPage() {
+export default function CartPage() {
   const {
     cartCount,
     cartDetails,
@@ -17,116 +22,130 @@ function CartPage() {
     clearCart,
   } = useShoppingCart();
 
-
-  async function handleCheckoutClick(event: any) {
+  async function handleCheckoutClick(event: React.MouseEvent) {
     event.preventDefault();
     try {
       const result = await redirectToCheckout();
-      if (!result?.error) {
-        clearCart();
-      } else {
+      if (result?.error) {
         console.error("Checkout error:", result.error);
+      } else {
+        clearCart();
       }
     } catch (error) {
       console.error("Checkout failed:", error);
-    } 
-    clearCart();
+    }
   }
+
   return (
     <PageContainer>
-      <section className="h-screen">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center">
-          <h2 className="text-3xl text-center font-bold text-gray-900 bg-gradient-to-r from-indigo-400 to-pink-600 bg-clip-text text-transparent sm:text-4xl md:text-4xl">Your Cart</h2>
-          </div>
-          { cartCount === 0 ? (
-                     <div className="flex items-center justify-center">
-                     <h1 className="text-2xl font-semibold text-gray-900 dark:text-slate-100">You Dont Have Items in Cart</h1>
-                   </div>
-          ) : (
-            <div className="mx-auto mt-8 max-w-2xl md:mt-12">
-            <div className="shadow">
-              <div className="px-4 py-6 sm:px-8 sm:py-10">
-                <div className="flow-root">
-                  <ul className="-my-8">
-                    {Object.values(cartDetails ?? {}).map((entry) => (
-                    <li key={entry.id} className="flex flex-col space-y-3 py-6 text-left sm:flex-row sm:space-x-5 sm:space-y-0">
-                    <div className="shrink-0">
-                      <Link href={`/product/${entry.id}`}>
-                      <Image src={entry.image as string} className="h-24 w-24 max-w-full rounded-lg object-cover" alt="product-image" height={100} width={100}/>
-                      </Link>
+      <section>
+        <h1 className="text-3xl font-bold text-foreground sm:text-4xl mb-2">Your Cart</h1>
+        <p className="text-sm text-muted-foreground mb-8">
+          {cartCount === 0 ? "No items" : `${cartCount} ${cartCount === 1 ? "item" : "items"}`}
+        </p>
 
+        {cartCount === 0 ? (
+          <EmptyState
+            title="Your cart is empty"
+            description="Looks like you haven't added anything yet."
+            actionLabel="Browse Products"
+            actionHref="/products"
+          />
+        ) : (
+          <div className="lg:grid lg:grid-cols-3 lg:gap-8">
+            {/* Items list */}
+            <div className="lg:col-span-2">
+              <ul className="divide-y divide-border">
+                {Object.values(cartDetails ?? {}).map((entry) => (
+                  <li key={entry.id} className="flex gap-4 py-6">
+                    <div className="flex-shrink-0">
+                      <Link href={`/product/${entry.id}`}>
+                        <Image
+                          src={entry.image as string}
+                          className="h-24 w-24 rounded-lg object-cover bg-muted"
+                          alt={entry.name}
+                          height={96}
+                          width={96}
+                        />
+                      </Link>
                     </div>
-                    <div className="relative flex flex-1 flex-col justify-between">
-                      <div className="sm:col-gap-5 sm:grid sm:grid-cols-2">
-                        <div className="pr-8 sm:pr-5">
-                          <p className="text-base font-semibold text-gray-900 dark:text-slate-100">{entry.name}</p>
-                          <p className="mx-0 mt-1 mb-0 text-sm text-gray-900 dark:text-slate-100">${entry.price}</p>
+
+                    <div className="flex flex-1 flex-col justify-between min-w-0">
+                      <div className="flex justify-between gap-4">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-foreground truncate">{entry.name}</p>
+                          <p className="mt-0.5 text-sm text-muted-foreground">
+                            {formatPrice(entry.price)} each
+                          </p>
                         </div>
-                        <div className="mt-4 flex items-end justify-between sm:mt-0 sm:items-start sm:justify-end">
-                          <p className="shrink-0 w-20 text-base font-semibold text-gray-900 dark:text-slate-100 sm:order-2 sm:ml-8 sm:text-right">${entry.quantity * entry.price}</p>
-                          <div className="sm:order-1">
-                            <div className="mx-auto flex h-8 items-stretch text-gray-600">
-                            <button
-                              onClick={() => decrementItem(entry.id)}
-                               className="flex items-center justify-center rounded-r-md bg-gray-200 px-4 transition hover:bg-cyan-100 hover:text-white">-</button>
-                              <div className="flex w-full items-center justify-center bg-gray-100 px-4 text-xs uppercase transition">{entry.quantity}</div>
-                              <button
-                              onClick={() => incrementItem(entry.id)}
-                               className="flex items-center justify-center rounded-r-md bg-gray-200 px-4 transition hover:bg-cyan-100 hover:text-white">+</button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="absolute top-0 right-0 flex sm:bottom-0 sm:top-auto">
-                        <button onClick={() => removeItem(entry.id)} className="flex rounded p-2 text-center text-gray-100 transition-all duration-200 ease-in-out focus:shadow hover:text-gray-900">
-                          <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" className="" />
-                          </svg>
+                        <button
+                          onClick={() => removeItem(entry.id)}
+                          className="flex-shrink-0 p-1.5 rounded text-muted-foreground hover:text-destructive transition-colors"
+                          aria-label={`Remove ${entry.name}`}
+                        >
+                          <X className="h-4 w-4" />
                         </button>
+                      </div>
+
+                      <div className="flex items-center justify-between mt-3">
+                        <div className="flex h-8 items-stretch rounded-md overflow-hidden border border-border">
+                          <button
+                            onClick={() => decrementItem(entry.id)}
+                            className="px-3 flex items-center justify-center bg-secondary hover:bg-secondary/80 text-secondary-foreground text-sm transition-colors"
+                            aria-label="Decrease quantity"
+                          >
+                            −
+                          </button>
+                          <div className="px-4 flex items-center justify-center bg-background text-sm font-medium text-foreground border-x border-border">
+                            {entry.quantity}
+                          </div>
+                          <button
+                            onClick={() => incrementItem(entry.id)}
+                            className="px-3 flex items-center justify-center bg-secondary hover:bg-secondary/80 text-secondary-foreground text-sm transition-colors"
+                            aria-label="Increase quantity"
+                          >
+                            +
+                          </button>
+                        </div>
+                        <p className="text-sm font-semibold text-foreground">
+                          {formatPrice(entry.quantity * entry.price)}
+                        </p>
                       </div>
                     </div>
                   </li>
-                    ))}
-                
-                  </ul>
+                ))}
+              </ul>
+            </div>
+
+            {/* Order summary sidebar */}
+            <div className="mt-8 lg:mt-0">
+              <div className="rounded-lg border border-border bg-card p-6 space-y-4 lg:sticky lg:top-24">
+                <h2 className="text-lg font-semibold text-foreground">Order Summary</h2>
+                <Separator />
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal ({cartCount} {cartCount === 1 ? "item" : "items"})</span>
+                  <span className="font-medium text-foreground">{formatPrice(totalPrice ?? 0)}</span>
                 </div>
-                <div className="mt-6 border-t border-b py-2">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-900 dark:text-slate-100">Subtotal</p>
-                    <p className="text-lg font-semibold text-gray-900 dark:text-cyan-100">${totalPrice}</p>
-                  </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Shipping</span>
+                  <span className="text-muted-foreground">Calculated at checkout</span>
                 </div>
-                <div className="mt-6 flex items-center justify-between">
-                  <p className="text-xl font-boldtext-gray-900 dark:text-slate-100">Total</p>
-                  <p className="text-2xl font-semibold text-gray-900 dark:text-slate-100"><span className="text-xs font-normal text-gray-400"></span>${totalPrice}</p>
+                <Separator />
+                <div className="flex justify-between font-semibold">
+                  <span className="text-foreground">Total</span>
+                  <span className="text-foreground">{formatPrice(totalPrice ?? 0)}</span>
                 </div>
-                <div className="mt-6 my-3 text-center">
-                  <button type="button" onClick={handleCheckoutClick} className="group mb-2 inline-flex w-full items-center justify-center rounded-md bg-gray-900 px-6 py-4 text-lg font-semibold text-white transition-all duration-200 ease-in-out focus:shadow hover:bg-gray-800">
-                    Checkout
-                    <svg xmlns="http://www.w3.org/2000/svg" className="group-hover:ml-8 ml-4 h-6 w-6 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </button>
-                  <Link href="/products">
-                  <button className="group inline-flex w-full items-center justify-center rounded-md bg-green-600 px-6 py-2 text-lg font-semibold text-white transition-all duration-200 ease-in-out focus:shadow hover:bg-cyan-800">
-                    Continue Shopping
-                  <svg className="w-6 h-6 text-gray-100 dark:text-white group-hover:ml-8 transition-all" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width={24} height={24} fill="currentColor" viewBox="0 0 24 24">
-                <path fillRule="evenodd" d="M14 7h-4v3a1 1 0 0 1-2 0V7H6a1 1 0 0 0-.997.923l-.917 11.924A2 2 0 0 0 6.08 22h11.84a2 2 0 0 0 1.994-2.153l-.917-11.924A1 1 0 0 0 18 7h-2v3a1 1 0 1 1-2 0V7Zm-2-3a2 2 0 0 0-2 2v1H8V6a4 4 0 0 1 8 0v1h-2V6a2 2 0 0 0-2-2Z" clipRule="evenodd" />
-                  </svg>
-                  </button>
-                  </Link>
-  
-                </div>
+                <Button className="w-full" size="lg" onClick={handleCheckoutClick}>
+                  Checkout <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <Button variant="outline" className="w-full" asChild>
+                  <Link href="/products">Continue Shopping</Link>
+                </Button>
               </div>
             </div>
           </div>
-          )}
-
-        </div>
+        )}
       </section>
     </PageContainer>
-  )
+  );
 }
-
-export default CartPage

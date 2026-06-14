@@ -1,62 +1,41 @@
 import Link from "next/link"
-import { client } from "../lib/sanity" 
 import Image from "next/image"
+import { getAllCategories, CATEGORIES_REVALIDATE } from "@/lib/api/queries"
 
+export const revalidate = CATEGORIES_REVALIDATE;
 
-interface Category {
-  name : string
-  images: string[];
-  imageUrl :string
-}
-
-
-async function getCategories() {
-
-    const query = `*[_type == "category"]{
-      _id,
-      name,
-        "imageUrl": images[0].asset->url
-    }`;
-
-    const categories = await client.fetch(query);
-    return categories;
-  }
-  
-async function Categories() {
-
-  const categories = await getCategories();
-
+export default async function CategoriesPage() {
+  const categories = await getAllCategories();
 
   return (
-    <div>
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-2xl py-16 sm:py-24 lg:max-w-none lg:py-28">
-      <h2 className="text-3xl text-center font-extrabold text-gray-900 bg-gradient-to-r from-indigo-400 to-pink-600 bg-clip-text text-transparent sm:text-4xl md:text-4xl">Popular Categories</h2>
-        <div className="mt-6 space-y-12 lg:grid lg:grid-cols-3 lg:gap-x-6 lg:space-y-0">
-          {categories.map((category : Category) => (
-            <Link href={`/categories/${category.name}`} key={category.name} >
-                   <div className="group relative mb-4">
-              <div className="relative h-80 overflow-hidden border rounded-lg bg-white sm:aspect-h-1 sm:aspect-w-2 lg:aspect-h-1 lg:aspect-w-1 group-hover:opacity-75">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="mb-10 text-center">
+        <h1 className="text-3xl font-bold text-foreground sm:text-4xl">Categories</h1>
+        <p className="mt-2 text-muted-foreground">Browse our curated collections</p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {categories.map((category) => (
+          <Link href={`/categories/${category._id}`} key={category._id}>
+            <div className="group relative h-64 overflow-hidden rounded-xl border border-border bg-card hover:shadow-md hover:ring-1 hover:ring-primary/30 transition-all duration-200">
               <Image
-               src={category.imageUrl}
-                 alt="product image"
-                 className="w-full h-full object-cover object-center lg:h-full lg:w-full"
-                  width={300}
-                  height={300}
-                />
-              </div>
-              <h3 className="mt-3 text-xl text-gray-900 dark:text-slate-100 font-bold flex justify-center items-center">
-                  <span className="absolute inset-0" />
+                src={category.imageUrl}
+                alt={category.name}
+                className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                width={400}
+                height={256}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              <div className="absolute bottom-0 inset-x-0 px-4 py-3">
+                <h3 className="text-base font-semibold text-white">
                   {category.name}
-              </h3>
+                </h3>
+              </div>
             </div>
-            </Link>
-          ))}
-        </div>
+          </Link>
+        ))}
       </div>
     </div>
-  </div>
-  )
+  );
 }
-
-export default Categories

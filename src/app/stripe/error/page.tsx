@@ -1,31 +1,35 @@
 import React from 'react'
-import PageContainer from '../../components/PageContainer'
+import PageContainer from '@/components/layout/PageContainer'
 import Link from "next/link"
+import { XCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+
 function ErrorPage() {
-    return (
-      <PageContainer>
-      <div className="p-6  md:mx-auto">
-        <div className="text-center">
-          <h3 className="md:text-2xl text-base text-gray-900 font-semibold text-center">Payment UnSuccessful!</h3>
-          <p className="text-gray-600 my-2">You can make Purchase and try again.</p>
-          <p>Thanks for your Patronage!</p>
-          <Link href="/categories">
-          <div className="py-10 text-center flex justify-center items-center">
-            <div className="bg-cyan-600 w-1/2 flex justify-center items-center hover:bg-cyan-500 rounded-lg text-white font-semibold py-3">
-              Shop Again
-            </div>
+  return (
+    <PageContainer>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="flex max-w-md w-full flex-col items-center gap-6 rounded-xl border border-border bg-card p-10 text-center shadow-sm">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+            <XCircle className="h-8 w-8 text-destructive" />
           </div>
-          </Link>
-    
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-foreground">Payment Unsuccessful</h2>
+            <p className="text-muted-foreground">
+              Something went wrong with your payment. You can try again.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 w-full">
+            <Button asChild size="lg">
+              <Link href="/categories">Try Again</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link href="/">Go Home</Link>
+            </Button>
+          </div>
         </div>
       </div>
-        </PageContainer>
-      )
+    </PageContainer>
+  );
 }
 
-export default ErrorPage
-
-
-
-
-
+export default ErrorPage;
