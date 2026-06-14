@@ -30,7 +30,9 @@ export function CartSheet() {
     setIsLoading(true);
     try {
       const items = Object.values(cartDetails).map((entry) => ({
-        price_id: entry.price_id as string,
+        name: entry.name,
+        price: entry.price,
+        currency: entry.currency ?? "USD",
         quantity: entry.quantity,
       }));
       const res = await fetch("/api/checkout", {

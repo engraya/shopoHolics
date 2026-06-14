@@ -1,23 +1,16 @@
 <div align="center">
 
-# 🛍️ Shopoholics
+# Shopoholics
 
-### A modern, production-grade e-commerce storefront built for performance, scalability, and great developer experience.
-
-<br/>
+**A production-grade, full-stack e-commerce platform — headless CMS, real authentication, Stripe payments, order persistence, and transactional email out of the box.**
 
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Sanity](https://img.shields.io/badge/Sanity-CMS-F03E2F?style=for-the-badge&logo=sanity&logoColor=white)](https://www.sanity.io/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
 [![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://stripe.com/)
+[![Sanity](https://img.shields.io/badge/Sanity-CMS-F03E2F?style=for-the-badge&logo=sanity&logoColor=white)](https://www.sanity.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
-
-<br/>
-
-> Built with the App Router, headless CMS, Stripe Checkout, dark mode, and full TypeScript — production-ready from day one.
-
-<br/>
 
 [Live Demo](#) · [Report Bug](https://github.com/Engraya/shopoholics/issues) · [Request Feature](https://github.com/Engraya/shopoholics/issues)
 
@@ -25,277 +18,277 @@
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Overview](#-overview)
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Project Architecture](#-project-architecture)
-- [Getting Started](#-getting-started)
-- [Environment Variables](#-environment-variables)
-- [Available Scripts](#-available-scripts)
-- [Page Routes](#-page-routes)
-- [Data Layer — Sanity CMS](#-data-layer--sanity-cms)
-- [Payment Flow — Stripe](#-payment-flow--stripe)
-- [Performance Optimizations](#-performance-optimizations)
-- [Security](#-security)
-- [Screenshots](#-screenshots)
-- [Deployment](#-deployment)
-- [Developer Notes](#-developer-notes)
-- [Roadmap](#-roadmap)
-- [Contributing](#-contributing)
-- [License](#-license)
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Scripts](#scripts)
+- [Page Routes](#page-routes)
+- [Data Layer](#data-layer)
+- [Authentication](#authentication)
+- [Payments & Order Flow](#payments--order-flow)
+- [Email Notifications](#email-notifications)
+- [API Reference](#api-reference)
+- [Performance](#performance)
+- [Security](#security)
+- [Screenshots](#screenshots)
+- [Deployment](#deployment)
+- [Developer Notes](#developer-notes)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## 🧭 Overview
+## Overview
 
-**Shopoholics** is a full-stack e-commerce storefront built with **Next.js 14 App Router**, designed to deliver a fast, accessible, and polished shopping experience. It uses **Sanity** as a headless CMS for structured product and category management, and **Stripe** for secure payment processing — all wrapped in a fully type-safe TypeScript codebase with a dark-mode-ready UI.
+**Shopoholics** is a complete, production-ready e-commerce application built on **Next.js 14 App Router** with TypeScript strict mode throughout. It handles every layer of a real storefront — from content management and product browsing to authenticated checkout, webhook-driven order persistence, and transactional email delivery.
+
+The project deliberately covers the parts most tutorials skip: what happens *after* the payment, how orders get persisted reliably, how users manage their accounts, and how the back-end stays secure.
 
 ### The Problem It Solves
 
-Most e-commerce templates are either too opinionated and hard to extend, or too bare-bones for production use. Shopoholics bridges that gap — it's a clean, well-structured starting point that handles the hard parts (CMS integration, Stripe checkout, image optimization, ISR, loading/error states, dark mode, accessibility) while remaining easy to customize and scale.
+Most e-commerce starters give you a product grid and a Stripe redirect. Shopoholics goes further — it's a fully wired system where a completed payment triggers a webhook, creates an order record in PostgreSQL, emails the customer a receipt, and surfaces the order in the user's account history. Everything connects.
 
 ### Who It's For
 
-- **Developers** building a real store and needing a production-ready foundation
-- **Freelancers** looking for a clean client-deliverable template
-- **Portfolio projects** that need to impress with both design and engineering quality
-- **Businesses** wanting a fast, SEO-friendly, and maintainable storefront
+- Developers who want a **reference implementation** of a production Next.js storefront
+- Freelancers and agencies needing a **battle-tested foundation** to build on for clients
+- Engineers studying how **auth, payments, webhooks, and email** fit together in a single Next.js app
+- Portfolio projects that need to demonstrate genuine full-stack depth
 
 ---
 
-## ✨ Features
+## Features
 
-### 🛒 Core Commerce
-- Browse products across a responsive grid (2 → 3 → 4 columns on mobile → tablet → desktop)
-- Category-based filtering with dedicated category pages and breadcrumb navigation
+### Storefront
+
+- Responsive product grid — 2 → 3 → 4 columns across breakpoints
+- Browse by category with dedicated filtered views and breadcrumb navigation
 - Full product detail pages with multi-image gallery and thumbnail carousel
-- New arrivals section with "New" badge indicators
-- Persistent shopping cart powered by `use-shopping-cart`
-- Dedicated full-page cart view with quantity controls and live order summary
-- Stripe Checkout integration with success and error recovery pages
+- New arrivals page with "New" badge indicators
+- Empty states and 404 handling at both global and per-route levels
+- Skeleton loading screens on every route for zero layout shift
 
-### 🎨 UI & Design
-- Clean, modern interface built on **shadcn/ui** and **Radix UI** primitives
-- Dark / Light / System theme switching with persistent preference via `next-themes`
-- Smooth hover and transition animations throughout
-- Skeleton loading screens for perceived performance on every route
-- Slide-out cart drawer accessible from any page
+### Cart & Checkout
+
+- Persistent slide-out cart drawer accessible from any page (localStorage-backed)
+- Per-item quantity controls and individual item removal
+- Dedicated full cart page with live order summary
+- Stripe Checkout integration — hosted, PCI-compliant payment page
+- Shipping address collection (US, CA, GB, AU)
 - Confetti celebration animation on successful purchase
-- Toast notifications via **Sonner**
+- Payment error page with clear recovery options
 
-### ⚡ Performance
-- Incremental Static Regeneration (ISR) with per-route revalidation windows (60–300s)
-- `generateStaticParams` for pre-built product pages at build time — zero cold starts
-- Next.js Image optimization with Sanity CDN remote patterns
-- Responsive `sizes` attributes for efficient srcset generation
-- Zero layout shift with skeleton placeholders during data fetches
+### Authentication
 
-### 🔒 Accessibility & Standards
-- Radix UI primitives provide full ARIA compliance and keyboard navigation out of the box
-- Semantic HTML throughout all page components
-- Focus management handled automatically by Radix on modal/drawer interactions
+- Email/password registration with bcrypt hashing (cost factor 12)
+- Password validation enforced at the server action level (minimum 8 characters)
+- Google OAuth sign-in via NextAuth v5 (Auth.js) with PrismaAdapter
+- Forgot password flow
+- Unified session handling across credentials and OAuth providers
+- Role-based access control — `CUSTOMER` and `ADMIN` roles baked into the JWT and session
 
-### 🧑‍💻 Developer Experience
-- Strict TypeScript — zero `any`, zero compiler errors
-- Clean feature-based folder structure (`src/features/`) for long-term scalability
-- Centralized GROQ queries with typed return projections
-- Path aliases (`@/*`, `@components/*`) for clean, refactor-friendly imports
-- `shadcn/ui` `components.json` for frictionless component additions via CLI
-- `.env.example` for instant developer onboarding
+### Order Management
 
-### 🔐 Security
-- Strict HTTP security headers applied globally in `next.config.mjs`
-- No secrets exposed to the client (only `NEXT_PUBLIC_` keys)
-- Stripe Checkout is hosted — no raw card data ever touches the application
-- Permissions Policy that disables camera, microphone, and geolocation browser APIs
+- Stripe webhook listener (`checkout.session.completed`) persists orders to PostgreSQL
+- Idempotency guard — duplicate webhooks do not create duplicate orders
+- Order history page in the user account dashboard
+- Per-order detail view with itemized breakdown and shipping address
+- Order status lifecycle: `PENDING → PROCESSING → SHIPPED → DELIVERED` (plus `REFUNDED` and `CANCELLED`)
+
+### User Account
+
+- Profile management page
+- Saved shipping addresses with default address support
+- Account dashboard with navigation between profile, orders, and addresses
+
+### Email Notifications
+
+- Welcome email sent immediately on registration (non-blocking)
+- Order confirmation email with full itemized receipt sent on payment success
+- React Email templates — fully styled, maintainable, version-controlled markup
+
+### UI & Design
+
+- Clean, modern interface built on shadcn/ui and Radix UI primitives
+- Dark / Light / System theme with persistent preference via next-themes
+- Smooth hover and transition animations throughout
+- Toast notifications via Sonner
+- Admin dashboard link visible in the user menu for ADMIN role users
+
+### Developer Experience
+
+- Feature-domain folder structure (`features/auth/`, `features/products/`, `features/cart/`, `features/orders/`)
+- Single source of truth for GROQ projections and ISR revalidation constants
+- DummyJSON adapter that mirrors the exact Sanity query interface — swap data sources without touching page components
+- Path aliases (`@/*` → `src/`) throughout
+- Prisma singleton pattern for safe connection reuse in serverless environments
+- Zero TypeScript errors in strict mode
 
 ---
 
-## 🧱 Tech Stack
+## Tech Stack
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| **Framework** | Next.js 14 (App Router) | Full-stack React framework, SSR / ISR / SSG |
-| **Language** | TypeScript 5 (strict) | Type safety across the entire codebase |
-| **Styling** | Tailwind CSS 3 | Utility-first responsive styling |
-| **UI Components** | shadcn/ui + Radix UI | Accessible, composable component primitives |
-| **Icons** | Lucide React | Clean, consistent icon set |
-| **Theme** | next-themes | System-aware dark/light/system mode |
-| **Animations** | tailwindcss-animate + canvas-confetti | UI transitions and post-purchase celebration |
-| **Notifications** | Sonner | Lightweight, beautiful toast system |
-| **CMS** | Sanity (headless) | Structured content for products and categories |
-| **CMS Client** | next-sanity + @sanity/image-url | ISR-aware Sanity client with image URL builder |
-| **Payments** | Stripe + use-shopping-cart | Hosted Stripe Checkout and cart state management |
-| **Cart State** | use-shopping-cart | Client-side cart with localStorage persistence |
-| **Class Utilities** | clsx + tailwind-merge + class-variance-authority | Safe, conflict-free className composition |
-| **Deployment** | Vercel (recommended) | Edge-optimized Next.js hosting |
-
----
-
-## 📁 Project Architecture
-
-```
-shopoHolics/
-│
-├── src/
-│   ├── app/                          # Next.js App Router (pages & layouts)
-│   │   ├── layout.tsx                # Root layout — fonts, providers, metadata
-│   │   ├── page.tsx                  # Homepage — hero, featured products, CTAs
-│   │   ├── globals.css               # CSS variables, dark theme, Tailwind layers
-│   │   ├── loading.tsx               # Global suspense skeleton
-│   │   ├── error.tsx                 # Global error boundary
-│   │   ├── not-found.tsx             # Custom 404 page
-│   │   │
-│   │   ├── products/
-│   │   │   ├── page.tsx              # All products grid with sort control
-│   │   │   └── loading.tsx           # Products skeleton loader
-│   │   │
-│   │   ├── categories/
-│   │   │   ├── page.tsx              # Category browser with cover images
-│   │   │   ├── [category]/page.tsx   # Products filtered by category
-│   │   │   └── loading.tsx           # Categories skeleton loader
-│   │   │
-│   │   ├── product/
-│   │   │   └── [slug]/
-│   │   │       ├── page.tsx          # Product detail — gallery, info, add to cart
-│   │   │       └── not-found.tsx     # Product-specific 404 page
-│   │   │
-│   │   ├── newest/page.tsx           # New arrivals with "New" badges
-│   │   ├── reviews/page.tsx          # Customer reviews and rating breakdown
-│   │   ├── cart/page.tsx             # Full cart page with order summary sidebar
-│   │   │
-│   │   └── stripe/
-│   │       ├── success/page.tsx      # Post-checkout success + confetti
-│   │       └── error/page.tsx        # Payment failure with recovery options
-│   │
-│   ├── components/                   # Shared layout and UI components
-│   │   ├── layout/
-│   │   │   ├── Navbar.tsx            # Sticky nav — links, cart button, theme toggle
-│   │   │   ├── Footer.tsx            # Footer with brand and navigation links
-│   │   │   └── PageContainer.tsx     # Centered max-width content wrapper
-│   │   │
-│   │   ├── providers/
-│   │   │   ├── ThemeProvider.tsx     # next-themes wrapper component
-│   │   │   ├── ThemeToggler.tsx      # Light/Dark/System dropdown switcher
-│   │   │   └── CartProvider.tsx      # use-shopping-cart configuration
-│   │   │
-│   │   └── ui/                       # shadcn/ui component library
-│   │       ├── button.tsx            # 6 variants, 4 sizes
-│   │       ├── sheet.tsx             # Slide-out drawer
-│   │       ├── dropdown-menu.tsx     # Rich dropdown menu primitives
-│   │       ├── badge.tsx             # Status/category labels
-│   │       ├── skeleton.tsx          # Loading placeholder shapes
-│   │       ├── input.tsx             # Form text input
-│   │       ├── separator.tsx         # Horizontal/vertical divider
-│   │       ├── Breadcrumb.tsx        # Navigation hierarchy
-│   │       ├── EmptyState.tsx        # No-data UI with call-to-action
-│   │       └── sonner.tsx            # Toast notification provider
-│   │
-│   ├── features/                     # Domain-specific feature modules
-│   │   ├── products/
-│   │   │   └── components/
-│   │   │       ├── ProductCard.tsx           # Grid card — image, price, badge, CTA
-│   │   │       ├── AddToCartButton.tsx       # Cart add handler with sheet trigger
-│   │   │       ├── ImageGallery.tsx          # Main image + thumbnail carousel
-│   │   │       └── LandingPageCollections.tsx # Hero image grid for homepage
-│   │   │
-│   │   └── cart/
-│   │       └── components/
-│   │           └── CartSheet.tsx     # Slide-out cart — items, quantities, checkout
-│   │
-│   ├── lib/
-│   │   ├── sanity/
-│   │   │   ├── client.ts             # Sanity client + image URL builder
-│   │   │   └── queries.ts            # Typed GROQ queries with revalidation
-│   │   └── utils.ts                  # cn(), formatPrice(), runFireworks()
-│   │
-│   └── types/
-│       └── index.ts                  # Shared TypeScript interfaces
-│
-├── sanity/
-│   └── sanity.config.ts             # Sanity Studio configuration
-│
-├── public/                           # Static assets
-├── .env.example                      # Environment variable template
-├── next.config.mjs                   # Security headers, image remote patterns
-├── tailwind.config.ts                # Theme tokens, dark mode, animations
-├── tsconfig.json                     # Strict TypeScript, path aliases
-├── components.json                   # shadcn/ui CLI configuration
-└── package.json
-```
-
-### Key Architectural Decisions
-
-| Decision | Rationale |
+| Layer | Technology |
 |---|---|
-| **Feature-based structure** (`src/features/`) | Co-locates components with their domain — scales cleanly without a bloated `components/` directory |
-| **Centralized GROQ queries** (`src/lib/sanity/queries.ts`) | Single source of truth for all data fetching; typed projections prevent over-fetching |
-| **ISR over static-only** | Allows content updates without redeployment while keeping pages fast and cacheable |
-| **`use-shopping-cart`** | Official Stripe cart library — handles state, localStorage persistence, and checkout redirect |
-| **shadcn/ui** | Copy-owned components: no black-box upgrades, full control over styling and behavior |
-| **Server Components by default** | Data fetching happens at the server component level with `async/await` — no client-side fetch waterfalls |
+| **Framework** | Next.js 14 (App Router) |
+| **Language** | TypeScript 5 (strict) |
+| **Styling** | Tailwind CSS 3.4, tailwindcss-animate |
+| **UI Components** | shadcn/ui, Radix UI |
+| **Icons** | Lucide React, Radix Icons |
+| **Fonts** | Inter via `next/font/google` |
+| **Toasts** | Sonner |
+| **Animations** | canvas-confetti |
+| **CMS** | Sanity (headless) with DummyJSON dev fallback |
+| **Database** | Neon (serverless PostgreSQL) |
+| **ORM** | Prisma 7 with `@prisma/adapter-neon` |
+| **Authentication** | NextAuth v5 / Auth.js (Credentials + Google OAuth) |
+| **Password Hashing** | bcryptjs |
+| **Payments** | Stripe Checkout, Stripe Webhooks |
+| **Cart State** | use-shopping-cart v3 (localStorage-persisted) |
+| **Theme** | next-themes |
+| **Email** | Resend + React Email |
+| **Class Utilities** | clsx, tailwind-merge, class-variance-authority |
+| **Deployment** | Vercel (recommended) |
 
 ---
 
-## 🚀 Getting Started
+## Architecture
+
+Shopoholics uses a feature-domain layout inside the Next.js App Router. Server components handle all data fetching by default; client components are pushed to leaf nodes only to keep the client bundle tight.
+
+```
+src/
+├── app/
+│   ├── (auth)/                        # Auth route group — independent layout
+│   │   ├── login/page.tsx
+│   │   ├── register/page.tsx
+│   │   └── forgot-password/page.tsx
+│   │
+│   ├── (shop)/                        # Storefront route group
+│   │   ├── page.tsx                   # Homepage — hero + featured products
+│   │   ├── products/                  # Full product catalog
+│   │   ├── categories/                # Category index + [category] filtered view
+│   │   ├── product/[slug]/            # Product detail (ISR + generateStaticParams)
+│   │   ├── newest/                    # New arrivals
+│   │   ├── cart/                      # Full cart page
+│   │   ├── account/                   # Protected: profile, orders, addresses
+│   │   │   ├── orders/[orderId]/      # Per-order detail view
+│   │   │   ├── profile/
+│   │   │   └── addresses/
+│   │   └── stripe/                    # Post-checkout success and error pages
+│   │
+│   └── api/
+│       ├── auth/[...nextauth]/        # NextAuth catch-all
+│       ├── checkout/                  # Creates Stripe Checkout session
+│       ├── orders/                    # Order history (authenticated)
+│       │   ├── [orderId]/             # Single order by DB ID
+│       │   └── by-session/[sessionId]/ # Order lookup by Stripe session
+│       └── webhooks/stripe/           # Stripe event handler
+│
+├── components/
+│   ├── layout/                        # Navbar, Footer, PageContainer
+│   ├── providers/                     # ThemeProvider, CartProvider, SessionProvider
+│   └── ui/                            # shadcn/ui primitives
+│
+├── features/
+│   ├── auth/                          # Login/Register forms, UserMenu, Server Actions
+│   ├── products/                      # ProductCard, AddToCartButton, ImageGallery
+│   ├── cart/                          # CartSheet slide-out drawer
+│   └── orders/                        # OrderCard, OrderStatusBadge
+│
+├── lib/
+│   ├── sanity/                        # Sanity client, urlFor(), GROQ queries + ISR constants
+│   ├── api/                           # DummyJSON adapter (same interface as Sanity queries)
+│   ├── email/                         # Resend client + React Email templates
+│   ├── auth.ts                        # NextAuth configuration
+│   ├── db.ts                          # Prisma singleton with Neon adapter
+│   └── utils.ts                       # cn(), formatPrice(), runFireworks()
+│
+└── types/
+    ├── index.ts                       # Product, Category, Order, CartItem interfaces
+    └── auth.ts                        # NextAuth session type augmentation
+```
+
+### Database Schema
+
+Managed by Prisma. Models:
+
+| Model | Purpose |
+|---|---|
+| `User` | Accounts created via credentials or OAuth. Has `role` (CUSTOMER / ADMIN) and `passwordHash` |
+| `Account` | OAuth provider linkage (PrismaAdapter) |
+| `Session` | NextAuth sessions |
+| `VerificationToken` | Email verification tokens |
+| `Address` | User-saved shipping addresses with `isDefault` flag |
+| `Order` | One order per Stripe session. Stores amounts in cents, customer info, and shipping address |
+| `OrderItem` | Individual line items within an order — name, slug, imageUrl, price, quantity |
+
+All monetary values are stored in **cents** to eliminate floating-point rounding errors.
+
+---
+
+## Getting Started
 
 ### Prerequisites
 
-- **Node.js** >= 18.17.0
-- **npm** >= 9 (or pnpm / yarn)
-- A [Sanity](https://www.sanity.io/) account with a configured project and dataset
-- A [Stripe](https://stripe.com/) account with products and a publishable key
+- Node.js 18+
+- A [Sanity](https://www.sanity.io/) project with `product` and `category` documents (or rely on the DummyJSON fallback for development)
+- A [Stripe](https://stripe.com/) account with products and price IDs created
+- A [Neon](https://neon.tech/) serverless PostgreSQL database
+- A [Google Cloud Console](https://console.cloud.google.com/) OAuth 2.0 client
+- A [Resend](https://resend.com/) account with a verified sender domain
 
-### 1. Clone the Repository
+### 1. Clone & Install
 
 ```bash
 git clone https://github.com/Engraya/shopoholics.git
 cd shopoholics
-```
-
-### 2. Install Dependencies
-
-```bash
 npm install
 ```
 
-> **Note:** This project uses `legacy-peer-deps=true` (set in `.npmrc`) to handle peer dependency compatibility across the current package ecosystem.
-
-### 3. Configure Environment Variables
+### 2. Configure Environment Variables
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 
-Open `.env.local` and fill in your Sanity and Stripe credentials (see [Environment Variables](#-environment-variables) below).
+Fill in all values — see [Environment Variables](#environment-variables) for a full reference.
 
-### 4. Set Up Sanity
-
-If setting up a new Sanity project:
+### 3. Set Up the Database
 
 ```bash
-# Install the Sanity CLI
-npm install -g @sanity/cli
+# Push the Prisma schema to your Neon database
+npm run db:push
 
-# Initialize a project (from the sanity/ directory)
-cd sanity
-sanity init
+# Or run migrations (for a tracked schema history)
+npm run db:migrate
 
-# Deploy the Studio
-sanity deploy
+# Inspect data visually
+npm run db:studio
 ```
 
-Your Sanity dataset should contain documents of type `product` and `category` with the fields expected by the GROQ queries in `src/lib/sanity/queries.ts`.
-
-### 5. Run the Development Server
+### 4. Run Development Server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000).
+
+### 5. Test Stripe Webhooks Locally
+
+Install the [Stripe CLI](https://stripe.com/docs/stripe-cli) and forward events to your local server:
+
+```bash
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
+```
+
+Copy the webhook signing secret printed by the CLI into `STRIPE_WEBHOOK_SECRET` in your `.env`.
 
 ### 6. Production Build
 
@@ -306,319 +299,456 @@ npm run start
 
 ---
 
-## 🔑 Environment Variables
-
-Create a `.env.local` file at the project root:
+## Environment Variables
 
 ```env
-# ─── Sanity CMS ─────────────────────────────────────────────────────────────
+# ─── Sanity CMS ────────────────────────────────────────────────────────────────
 # Your Sanity project ID — found at sanity.io/manage
-NEXT_PUBLIC_SANITY_PROJECT_ID=your_project_id_here
+NEXT_PUBLIC_SANITY_PROJECT_ID=
 
-# Sanity dataset name (default: "production")
+# Dataset name (default: production)
 NEXT_PUBLIC_SANITY_DATASET=production
 
-# ─── Stripe ──────────────────────────────────────────────────────────────────
-# Stripe publishable key — starts with pk_test_ (dev) or pk_live_ (prod)
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
+# ─── Stripe ────────────────────────────────────────────────────────────────────
+# Publishable key — safe to expose to the browser (pk_test_ or pk_live_)
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 
-# ─── Application ─────────────────────────────────────────────────────────────
-# Full base URL for Stripe redirect callbacks — no trailing slash
+# Secret key — NEVER expose to the client (sk_test_ or sk_live_)
+STRIPE_SECRET_KEY=
+
+# Webhook signing secret — from Stripe Dashboard or `stripe listen` CLI output
+STRIPE_WEBHOOK_SECRET=
+
+# ─── Application ───────────────────────────────────────────────────────────────
+# Full canonical URL — used in Stripe redirect URLs and email links (no trailing slash)
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
+
+# ─── Database (Neon PostgreSQL) ────────────────────────────────────────────────
+# Connection string from your Neon project dashboard
+DATABASE_URL=postgresql://user:password@ep-xxx.neon.tech/neondb?sslmode=require
+
+# ─── NextAuth v5 (Auth.js) ─────────────────────────────────────────────────────
+# Random secret: openssl rand -base64 32
+AUTH_SECRET=
+
+# Canonical URL of your app (same as NEXT_PUBLIC_BASE_URL)
+AUTH_URL=http://localhost:3000
+
+# ─── Google OAuth ──────────────────────────────────────────────────────────────
+# From Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# ─── Resend (Transactional Email) ──────────────────────────────────────────────
+# API key from resend.com/api-keys
+RESEND_API_KEY=
+
+# Verified sender address — must be a domain verified in your Resend account
+RESEND_FROM_EMAIL=orders@yourdomain.com
 ```
 
-> **Security note:** All variables prefixed with `NEXT_PUBLIC_` are bundled into the client. Never expose your Stripe **secret key** or Sanity **write token** via a `NEXT_PUBLIC_` variable. Stripe payments run through hosted Checkout — no secret key is required on the client.
+> **Security:** `NEXT_PUBLIC_` variables are inlined into the client bundle at build time. Never prefix secret keys or tokens with `NEXT_PUBLIC_`. The Stripe secret key and webhook secret are server-only and must remain in server-side environment variables.
 
 ---
 
-## 📜 Available Scripts
+## Scripts
 
 | Script | Description |
 |---|---|
 | `npm run dev` | Start the Next.js development server on port 3000 |
-| `npm run build` | Create an optimized production build |
-| `npm run start` | Serve the production build locally |
+| `npm run build` | Generate Prisma client and create an optimized production build |
+| `npm run start` | Serve the production build |
 | `npm run lint` | Run ESLint across the entire project |
+| `npm run db:migrate` | Run Prisma migrations in development |
+| `npm run db:push` | Push schema changes directly to the database (no migration history) |
+| `npm run db:studio` | Open Prisma Studio — a browser-based database GUI |
 
 ---
 
-## 🗺️ Page Routes
+## Page Routes
 
-| Route | Description | Data Source | ISR Revalidation |
+| Route | Description | Auth | ISR |
 |---|---|---|---|
-| `/` | Homepage — hero section and featured products | Sanity (4 products) | 60s |
-| `/products` | Full product catalog grid with sort | Sanity (all products) | 60s |
-| `/categories` | Category browser with cover images | Sanity | 300s |
-| `/categories/[category]` | Products filtered by a specific category | Sanity | 60s |
-| `/product/[slug]` | Product detail — gallery, description, add to cart | Sanity | 60s |
-| `/newest` | Latest 4 products with "New" badge | Sanity | 120s |
-| `/reviews` | Customer reviews and rating breakdown | Static | — |
-| `/cart` | Full cart page with order summary | Client state | — |
-| `/stripe/success` | Order confirmation with confetti animation | — | — |
-| `/stripe/error` | Payment failure with retry and home options | — | — |
+| `/` | Homepage — hero section and featured products | — | 60s |
+| `/products` | Full product catalog grid | — | 60s |
+| `/categories` | Category browser with cover images | — | 300s |
+| `/categories/[category]` | Products filtered by category | — | 60s |
+| `/product/[slug]` | Product detail — gallery, description, add to cart | — | 60s |
+| `/newest` | Latest arrivals with "New" badge | — | 120s |
+| `/cart` | Full cart review page | — | — |
+| `/stripe/success` | Order confirmation with confetti | — | — |
+| `/stripe/error` | Payment failure with recovery options | — | — |
+| `/login` | Email/password login + Google OAuth | — | — |
+| `/register` | Account registration | — | — |
+| `/forgot-password` | Password reset request | — | — |
+| `/account` | Account dashboard | Required | — |
+| `/account/orders` | Order history | Required | — |
+| `/account/orders/[orderId]` | Individual order detail | Required | — |
+| `/account/profile` | Profile management | Required | — |
+| `/account/addresses` | Saved shipping addresses | Required | — |
 
-Dynamic product routes (`/product/[slug]`) use `generateStaticParams` to pre-render all product pages at build time.
+Dynamic product routes (`/product/[slug]`) use `generateStaticParams()` to pre-render every product page at build time.
 
 ---
 
-## 🗄️ Data Layer — Sanity CMS
+## Data Layer
 
-### Client
+### Sanity CMS
 
-The Sanity client (`src/lib/sanity/client.ts`) is initialized with `next-sanity` and exports:
-
-- **`client`** — ISR-aware client for server component data fetching with `{ next: { revalidate } }` options
-- **`urlFor(source)`** — image URL builder that resolves Sanity asset references to CDN URLs
-
-### GROQ Query Functions
-
-All data-fetching logic is centralized in `src/lib/sanity/queries.ts` as typed async functions:
+All Sanity reads live in `src/lib/sanity/queries.ts` as typed async functions. Each call passes `next: { revalidate }` directly to fetch for ISR — no caching library required.
 
 ```typescript
-getAllProducts()              // → ProductSummary[]   revalidates: 60s
-getNewestProducts(limit)      // → ProductSummary[]   revalidates: 120s
-getProductBySlug(slug)        // → Product | null     revalidates: 60s
-getAllProductSlugs()           // → { slug: string }[] for generateStaticParams
-getAllCategories()             // → Category[]         revalidates: 300s
-getProductsByCategory(name)   // → ProductSummary[]   revalidates: 60s
+getAllProducts()                    // → ProductSummary[]   revalidates every 60s
+getNewestProducts(limit)            // → ProductSummary[]   revalidates every 120s
+getProductBySlug(slug)              // → Product | null     revalidates every 60s
+getAllProductSlugs()                 // → { slug: string }[] used by generateStaticParams
+getAllCategories()                   // → Category[]         revalidates every 300s
+getProductsByCategory(categoryName) // → ProductSummary[]   revalidates every 60s
 ```
 
-Each query uses a typed GROQ projection that fetches only the fields required by its consumer — no over-fetching.
+Shared GROQ projection strings (`PRODUCT_SUMMARY_PROJECTION`, `PRODUCT_DETAIL_PROJECTION`) are defined once in the queries file — the single source of truth for field selection. This ensures queries never over-fetch and that field additions are made in one place.
 
-### Data Models
+The `urlFor()` helper from `src/lib/sanity/client.ts` resolves Sanity image asset references to CDN URLs server-side — no client-side URL building.
+
+### DummyJSON Fallback
+
+`src/lib/api/queries.ts` is a drop-in adapter over the DummyJSON public API that implements the **exact same function signatures** as the Sanity queries. Any page can switch between data sources without any component changes.
+
+---
+
+## Authentication
+
+Authentication is handled by **NextAuth v5 (Auth.js)** with `@auth/prisma-adapter` persisting sessions and accounts to the Neon PostgreSQL database.
+
+### Providers
+
+- **Credentials** — email + bcrypt-validated password, stored in `User.passwordHash`
+- **Google OAuth** — standard OAuth 2.0 flow; account linked to User via the `Account` model
+
+### Session Shape
+
+The JWT and session are augmented with `id` and `role` via NextAuth callbacks:
 
 ```typescript
-interface Product {
-  _id: string
-  name: string
-  slug: string
-  description: string
-  price: number
-  price_id: string         // Stripe Price ID used for checkout
-  categoryName: string
-  images: SanityImage[]    // Full images array for gallery
-}
-
-interface ProductSummary {
-  _id: string
-  name: string
-  slug: string
-  price: number
-  price_id: string
-  categoryName: string
-  imageUrl: string         // Pre-resolved CDN URL (no client-side resolution needed)
-}
-
-interface Category {
-  _id: string
-  name: string
-  imageUrl: string
+// src/types/auth.ts
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      role: UserRole; // "CUSTOMER" | "ADMIN"
+    } & DefaultSession["user"];
+  }
 }
 ```
+
+### Registration Flow
+
+```
+register() Server Action
+  → Validate inputs
+  → Check for existing email
+  → bcrypt.hash(password, 12)
+  → db.user.create({ name, email, passwordHash })
+  → sendWelcomeEmail() [non-blocking, won't fail the registration]
+  → signIn("credentials", { redirectTo: "/" })
+```
+
+### Login Flow
+
+```
+login() Server Action → signIn("credentials", ...)
+  → NextAuth calls authorize() → db.user.findUnique by email
+  → bcrypt.compare(password, passwordHash)
+  → JWT issued: { id, role, name, email, image }
+  → Session available via auth() server-side or useSession() client-side
+```
+
+Errors from `AuthError` are mapped to user-facing messages before being returned from the Server Action — the form never sees raw NextAuth errors.
 
 ---
 
-## 💳 Payment Flow — Stripe
+## Payments & Order Flow
 
-Shopoholics uses **Stripe Checkout** (hosted) via the official `use-shopping-cart` library. The full flow:
+### Checkout
+
+The cart (managed by `use-shopping-cart`) collects Stripe `price_id` values from each product. On checkout, the cart calls `POST /api/checkout` with the line items:
 
 ```
-User adds item to cart
-        ↓
-Cart state updated in memory + persisted to localStorage
-        ↓
-User opens CartSheet → reviews items, adjusts quantities
-        ↓
-User clicks "Checkout" → use-shopping-cart calls redirectToCheckout()
-        ↓
-Browser redirects to Stripe-hosted payment page
-        ↓
-     Payment succeeds → redirect to /stripe/success → cart cleared + confetti
-     Payment fails    → redirect to /stripe/error  → recovery options shown
+POST /api/checkout  { items: [{ price_id, quantity }] }
+  → Stripe verifies prices server-side (client values are ignored)
+  → Stripe Checkout session created with success_url and cancel_url
+  → Response: { url: "https://checkout.stripe.com/pay/cs_..." }
+  → Client redirects to Stripe hosted page
 ```
 
-**Cart features:**
-- Real-time item count badge in the Navbar
-- Quantity increment / decrement per item
-- Individual item removal
-- Formatted subtotal display via `Intl.NumberFormat`
-- Auto-persists across page reloads via localStorage
+### Webhook
 
-Each product carries a Stripe `price_id`. Stripe resolves the canonical price server-side — client-submitted price values are ignored, preventing price tampering.
+On payment success, Stripe calls `POST /api/webhooks/stripe`:
+
+```
+Stripe sends checkout.session.completed event
+  → Validate Stripe-Signature header against STRIPE_WEBHOOK_SECRET
+  → Idempotency check: look for existing order with this stripeSessionId
+  → Retrieve full session with expand: ["line_items.data.price.product"]
+  → db.order.create() with all items, amounts, customer info, shipping address
+  → sendOrderConfirmationEmail() [non-blocking]
+  → Return 200 OK
+```
+
+The idempotency check means replayed webhooks (Stripe retries on non-2xx) never create duplicate orders.
+
+### Order Lifecycle
+
+```
+PENDING → PROCESSING → SHIPPED → DELIVERED
+                                    ↘ REFUNDED
+                              ↘ CANCELLED
+```
+
+### Success Page
+
+After redirect to `/stripe/success?session_id=...`, the page calls `GET /api/orders/by-session/[sessionId]` to display the completed order and fires the confetti animation.
 
 ---
 
-## ⚡ Performance Optimizations
+## Email Notifications
 
-| Optimization | How It's Implemented |
+Email is delivered via **[Resend](https://resend.com/)** using **React Email** templates stored in `src/lib/email/templates/`.
+
+| Template | Trigger | File |
+|---|---|---|
+| `WelcomeEmail` | User registers | `register()` Server Action (non-blocking) |
+| `OrderConfirmation` | Payment webhook received | `POST /api/webhooks/stripe` (non-blocking) |
+
+Both sends are wrapped in `.catch(console.error)` — a failed email never blocks the primary operation (registration or order creation).
+
+Templates are standard React components using `@react-email/components` — they're version-controlled, fully typed, and renderable as HTML via `@react-email/render`.
+
+---
+
+## API Reference
+
+All API routes are under `src/app/api/`. Protected routes use `auth()` from `src/lib/auth.ts`.
+
+### `POST /api/checkout`
+
+Creates a Stripe Checkout session.
+
+| Detail | Value |
 |---|---|
-| **Incremental Static Regeneration** | Per-route `revalidate` values (60–300s) — pages stay cached between deploys and update automatically |
-| **Build-time pre-rendering** | `generateStaticParams` on `/product/[slug]` ensures every product page is pre-built — no SSR cold starts |
-| **Next.js Image** | Automatic WebP/AVIF conversion, lazy loading by default, and responsive `sizes` for efficient bandwidth |
-| **Sanity CDN** | Images served from Sanity's global CDN with on-the-fly resizing via URL parameters |
-| **Skeleton loaders** | Per-route `loading.tsx` files using Skeleton components prevent layout shift during data fetches |
-| **Automatic code splitting** | App Router splits JavaScript per route — users only load code for pages they visit |
-| **Efficient GROQ projections** | Queries fetch only required fields — no full documents transferred over the wire |
+| Auth | Optional (guests allowed; authenticated users get `customer_email` pre-filled) |
+| Body | `{ items: Array<{ price_id: string; quantity: number }> }` |
+| Response | `{ url: string }` — Stripe hosted checkout URL |
+
+### `POST /api/webhooks/stripe`
+
+Stripe event handler. Validates `Stripe-Signature` header before processing.
+
+Processes: `checkout.session.completed`
+
+### `GET /api/orders`
+
+Returns the authenticated user's full order history with nested items, ordered by `createdAt` descending.
+
+| Detail | Value |
+|---|---|
+| Auth | Required |
+| Response | `Order[]` with nested `OrderItem[]` |
+
+### `GET /api/orders/[orderId]`
+
+Returns a single order by database ID, scoped to the authenticated user.
+
+### `GET /api/orders/by-session/[sessionId]`
+
+Looks up an order by Stripe `checkout.session.id`. Used by the success page immediately after checkout.
 
 ---
 
-## 🔐 Security
+## Performance
 
-The following HTTP security headers are applied globally via `next.config.mjs`:
+| Optimization | Implementation |
+|---|---|
+| **ISR per route** | `next: { revalidate }` on every Sanity fetch — pages update without redeployment |
+| **Build-time pre-rendering** | `generateStaticParams()` on `/product/[slug]` — every product page is pre-built at deploy time |
+| **Server components by default** | Data fetching is on the server; zero-bundle-cost for queries and data transformation |
+| **Leaf-node client boundaries** | `"use client"` only on interactive leaves (cart, forms, theme toggle) |
+| **Efficient GROQ projections** | Queries fetch only the fields their consumers use — no full documents over the wire |
+| **Next.js Image** | Automatic WebP/AVIF conversion, lazy loading, responsive `sizes` attributes |
+| **Neon serverless driver** | `@neondatabase/serverless` uses WebSockets — avoids TCP cold-start overhead in serverless |
+| **Prisma singleton** | Connection reused across hot reloads in development; no connection pool exhaustion |
+| **Font optimization** | Inter loaded via `next/font/google` with `display: swap` — no FOUT, self-hosted |
+
+---
+
+## Security
+
+### HTTP Headers (global, via `next.config.mjs`)
 
 | Header | Value | Purpose |
 |---|---|---|
-| `X-Content-Type-Options` | `nosniff` | Prevents MIME-type sniffing attacks |
-| `X-Frame-Options` | `DENY` | Blocks the site from being embedded in iframes (clickjacking protection) |
-| `X-XSS-Protection` | `1; mode=block` | Enables XSS filtering in legacy browsers |
-| `Referrer-Policy` | `strict-origin-when-cross-origin` | Controls how much referrer information is sent cross-origin |
-| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` | Disables sensitive browser APIs not required by the app |
+| `X-Content-Type-Options` | `nosniff` | Prevents MIME-type sniffing |
+| `X-Frame-Options` | `DENY` | Blocks iframe embedding — clickjacking protection |
+| `X-XSS-Protection` | `1; mode=block` | XSS filtering in legacy browsers |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | Controls cross-origin referrer leakage |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` | Disables sensitive browser APIs |
 
-**Additional security measures:**
-- Stripe handles all card data on its own PCI-compliant hosted page — the app never sees raw card numbers
-- Product prices are validated server-side by Stripe — client-submitted values are disregarded
-- Only `NEXT_PUBLIC_` (non-secret) keys are used on the client side
+### Application Security
+
+- Passwords hashed with bcrypt at cost factor 12 — never stored in plain text
+- Stripe handles all card data on its PCI-compliant hosted page — raw card numbers never reach the application
+- Stripe webhook signature validated before any database writes
+- Server Actions for auth mutations — credential validation runs entirely on the server
+- Only `NEXT_PUBLIC_` keys (non-secret) are accessible in the browser
+- Product prices resolved server-side by Stripe from `price_id` — client-submitted amounts are ignored
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
 > Add screenshots to `public/screenshots/` and update the paths below.
 
-### Homepage
+**Homepage — Hero & Featured Products**
 ![Homepage](public/screenshots/homepage.png)
 
-### Product Catalog
-![Products Grid](public/screenshots/products.png)
+**Product Catalog**
+![Products](public/screenshots/products.png)
 
-### Product Detail Page
+**Product Detail**
 ![Product Detail](public/screenshots/product-detail.png)
 
-### Shopping Cart
-![Cart Drawer](public/screenshots/cart.png)
+**Cart Drawer**
+![Cart](public/screenshots/cart.png)
 
-### Dark Mode
+**Order Confirmation**
+![Success](public/screenshots/success.png)
+
+**Order History**
+![Orders](public/screenshots/orders.png)
+
+**Dark Mode**
 ![Dark Mode](public/screenshots/dark-mode.png)
 
-### Mobile View
+**Mobile View**
 ![Mobile](public/screenshots/mobile.png)
-
-### Order Confirmation
-![Success Page](public/screenshots/success.png)
 
 ---
 
-## 🚢 Deployment
+## Deployment
 
 ### Vercel (Recommended)
 
-Shopoholics is optimized for Vercel — zero-configuration deployment for Next.js with automatic ISR and edge caching.
+Vercel provides zero-configuration Next.js hosting with automatic ISR and global edge caching.
 
 1. Push the repository to GitHub
 2. Import the project at [vercel.com/new](https://vercel.com/new)
-3. Add all `NEXT_PUBLIC_*` environment variables in the Vercel dashboard
-4. Click **Deploy** — Vercel handles builds, ISR revalidation, and CDN automatically
+3. Add all environment variables in the Vercel dashboard
+4. Set `NEXT_PUBLIC_BASE_URL` to your production domain (e.g., `https://shopoholics.vercel.app`)
+5. Deploy
 
 ```bash
-# Or deploy directly from the terminal
-npm install -g vercel
-vercel
+# Or via CLI
+npm i -g vercel && vercel
+```
+
+### Stripe Webhook (Production)
+
+In the Stripe Dashboard, create a webhook endpoint:
+
+```
+https://your-domain.com/api/webhooks/stripe
+```
+
+Subscribe to `checkout.session.completed`. Copy the signing secret into `STRIPE_WEBHOOK_SECRET`.
+
+### Database
+
+After provisioning your Neon database, run migrations before the first deploy:
+
+```bash
+npx prisma migrate deploy
 ```
 
 ### Other Platforms
 
-Any platform with Node.js 18+ support can serve this app:
+Any platform with Node.js 18+ support can host this app:
 
 ```bash
-npm run build   # Output to .next/
-npm run start   # Serve on $PORT (default: 3000)
+npm run build
+npm run start  # Listens on $PORT, defaults to 3000
 ```
 
-Ensure all environment variables are configured in your platform's environment settings **before running the build** — `NEXT_PUBLIC_*` values are inlined at build time.
+> Ensure all environment variables are set **before** running the build. `NEXT_PUBLIC_*` values are inlined at build time — setting them after the build has no effect.
 
 ---
 
-## 🧑‍💻 Developer Notes
+## Developer Notes
 
-### Key Patterns
+### Key Conventions
 
-| Pattern | Where Used |
+| Convention | Where |
 |---|---|
-| **Server Components** | All page-level data fetching with `async/await` — no `useEffect` waterfalls |
-| **`cn()` for classNames** | Every component — `cn(clsx(...), tailwind-merge(...))` prevents Tailwind conflicts |
-| **Typed GROQ projections** | Every query returns a named, typed shape — never raw `any` from the CMS |
-| **Feature isolation** | `src/features/` — each domain owns its components; shared primitives live in `src/components/ui/` |
+| `cn()` for all class composition | Every component — prevents Tailwind class conflicts via tailwind-merge |
+| Monetary values in cents | All `Order` and `OrderItem` DB fields (`totalCents`, `priceCents`, etc.) |
+| Server Actions for mutations | `features/auth/actions/auth.actions.ts` — no API routes needed for form submissions |
+| GROQ projection constants | `src/lib/sanity/queries.ts` — define once, reuse in every related query |
+| Feature-domain imports | Components import from their own feature; shared UI comes from `@/components/ui/` |
 
-### Adding shadcn/ui Components
+### Adding a New Page
+
+1. Create `src/app/(shop)/your-route/page.tsx` as an async server component
+2. Call the relevant query from `src/lib/sanity/queries.ts` at the top
+3. Add `loading.tsx` alongside it with a skeleton layout
+
+### Adding a New Sanity Query
+
+1. Define the TypeScript return type in `src/types/index.ts`
+2. Add a GROQ projection constant and async function in `src/lib/sanity/queries.ts`
+3. Call it directly in a server component — no API route required
+
+### Adding a shadcn/ui Component
 
 ```bash
 npx shadcn-ui@latest add <component-name>
 ```
 
-Components land in `src/components/ui/` with full source ownership — customize freely.
+Components land in `src/components/ui/` with full source ownership.
 
-### Adding a New Sanity Query
-
-1. Define the TypeScript return type in `src/types/index.ts`
-2. Write the GROQ query in `src/lib/sanity/queries.ts` with a `revalidate` option
-3. Call it directly in a Server Component — no API routes needed
-
-### Path Aliases Reference
+### Path Aliases
 
 | Alias | Resolves To |
 |---|---|
 | `@/*` | `src/*` |
 | `@src/*` | `src/*` |
-| `@components/*` | `components/*` |
+| `@components/*` | `components/*` (root-level) |
 | `@public/*` | `public/*` |
 
 ---
 
-## 🗺️ Roadmap
-
-Realistic improvements grounded in the current architecture:
-
-- [ ] **Sanity Studio embedded** — serve the Studio at `/studio` for in-app content editing
-- [ ] **Full-text search** — product search using Sanity's search API or Algolia
-- [ ] **Authentication** — NextAuth.js for user accounts and session management
-- [ ] **Order history** — Stripe webhook listener to persist completed orders
-- [ ] **Wishlist** — server-persisted wishlist linked to user accounts
-- [ ] **Real-time stock management** — stock levels synced from Sanity with sold-out states
-- [ ] **Per-page SEO metadata** — `generateMetadata()` on product and category pages
-- [ ] **Sitemap + robots.txt** — Next.js native sitemap generation for search indexing
-- [ ] **Analytics** — Vercel Analytics or PostHog for pageview and conversion tracking
-- [ ] **E2E test suite** — Playwright tests covering the core checkout flow
-
----
-
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome. Please follow these steps:
 
-1. **Fork** the repository
-2. **Create a feature branch:**
-   ```bash
-   git checkout -b feat/your-feature-name
-   ```
-3. **Make your changes** — keep commits focused and atomic
-4. **Lint before pushing:**
-   ```bash
-   npm run lint
-   ```
-5. **Open a Pull Request** against `master` with a clear description of what changed and why
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feat/your-feature-name`
+3. Make your changes — keep commits focused and atomic
+4. Verify TypeScript compiles cleanly: `npx tsc --noEmit`
+5. Run the linter: `npm run lint`
+6. Open a pull request against `master` with a clear description of what changed and why
 
 ### Code Standards
 
 - TypeScript strict mode is enforced — no `any`, no `@ts-ignore`
 - New components belong in the appropriate feature folder or `src/components/ui/`
+- All class names composed with `cn()` — never raw string concatenation
 - New data-fetching logic belongs in `src/lib/sanity/queries.ts` with a typed return shape
-- Use `cn()` for all className composition — never raw string concatenation
+- Secrets must never be committed — `.env` is gitignored, use `.env.example` for documentation
 
 ---
 
-## 📄 License
+## License
 
-This project is licensed under the **MIT License** — free to use, modify, and distribute for personal or commercial purposes.
+This project is licensed under the **MIT License** — free to use, modify, and distribute for personal and commercial purposes.
 
 See the [LICENSE](LICENSE) file for full details.
 
@@ -626,8 +756,8 @@ See the [LICENSE](LICENSE) file for full details.
 
 <div align="center">
 
-Built with care using [Next.js](https://nextjs.org/), [Sanity](https://www.sanity.io/), and [Stripe](https://stripe.com/)
+Built with [Next.js](https://nextjs.org/), [Prisma](https://www.prisma.io/), [Sanity](https://www.sanity.io/), [Stripe](https://stripe.com/), and [Resend](https://resend.com/)
 
-**[⬆ Back to top](#-shopoholics)**
+**[Back to top](#shopoholics)**
 
 </div>
