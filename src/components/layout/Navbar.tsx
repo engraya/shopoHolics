@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ThemeToggler } from '@/components/providers/ThemeToggler';
 import { CartSheet } from '@/features/cart/components/CartSheet';
+import { UserMenu } from '@/features/auth/components/UserMenu';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -50,6 +51,7 @@ export default function Navbar() {
         {/* Right side actions */}
         <div className="flex items-center gap-1">
           <CartSheet />
+          <UserMenu />
           <ThemeToggler />
           <Button
             variant="ghost"

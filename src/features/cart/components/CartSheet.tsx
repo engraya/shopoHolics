@@ -10,6 +10,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { useShoppingCart } from "use-shopping-cart";
+import { useState } from "react";
 
 export function CartSheet() {
   const {
@@ -19,21 +20,34 @@ export function CartSheet() {
     decrementItem,
     incrementItem,
     totalPrice,
-    redirectToCheckout,
-    clearCart,
   } = useShoppingCart();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleCheckoutClick(event: React.MouseEvent) {
     event.preventDefault();
+    if (!cartDetails || cartCount === 0) return;
+    setIsLoading(true);
     try {
-      const result = await redirectToCheckout();
-      if (result?.error) {
-        console.error("Checkout error:", result.error);
+      const items = Object.values(cartDetails).map((entry) => ({
+        price_id: entry.price_id as string,
+        quantity: entry.quantity,
+      }));
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
       } else {
-        clearCart();
+        console.error("Checkout error:", data.error);
       }
     } catch (error) {
       console.error("Checkout failed:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -131,8 +145,8 @@ export function CartSheet() {
               <span className="text-sm text-muted-foreground">Subtotal</span>
               <span className="text-base font-semibold text-foreground">{formatPrice(totalPrice ?? 0)}</span>
             </div>
-            <Button className="w-full" onClick={handleCheckoutClick}>
-              Checkout
+            <Button className="w-full" onClick={handleCheckoutClick} disabled={isLoading}>
+              {isLoading ? "Redirecting…" : "Checkout"}
             </Button>
             <Button variant="outline" className="w-full" asChild>
               <Link href="/products">Continue Shopping</Link>

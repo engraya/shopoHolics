@@ -5,6 +5,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'cdn.dummyjson.com' },
       { protocol: 'https', hostname: 'i.dummyjson.com' },
       { protocol: 'https', hostname: 'tailwindui.com' },
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
     ],
   },
   async headers() {

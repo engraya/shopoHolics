@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ArrowRight, X } from "lucide-react";
+import { useState } from "react";
 
 export default function CartPage() {
   const {
@@ -18,21 +19,34 @@ export default function CartPage() {
     decrementItem,
     incrementItem,
     totalPrice,
-    redirectToCheckout,
-    clearCart,
   } = useShoppingCart();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleCheckoutClick(event: React.MouseEvent) {
     event.preventDefault();
+    if (!cartDetails || cartCount === 0) return;
+    setIsLoading(true);
     try {
-      const result = await redirectToCheckout();
-      if (result?.error) {
-        console.error("Checkout error:", result.error);
+      const items = Object.values(cartDetails).map((entry) => ({
+        price_id: entry.price_id as string,
+        quantity: entry.quantity,
+      }));
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
       } else {
-        clearCart();
+        console.error("Checkout error:", data.error);
       }
     } catch (error) {
       console.error("Checkout failed:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -135,8 +149,8 @@ export default function CartPage() {
                   <span className="text-foreground">Total</span>
                   <span className="text-foreground">{formatPrice(totalPrice ?? 0)}</span>
                 </div>
-                <Button className="w-full" size="lg" onClick={handleCheckoutClick}>
-                  Checkout <ArrowRight className="ml-2 h-4 w-4" />
+                <Button className="w-full" size="lg" onClick={handleCheckoutClick} disabled={isLoading}>
+                  {isLoading ? "Redirecting…" : "Checkout"} <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <Button variant="outline" className="w-full" asChild>
                   <Link href="/products">Continue Shopping</Link>

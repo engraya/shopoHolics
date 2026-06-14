@@ -33,3 +33,46 @@ export interface CartItem {
   image: string;
   price_id: string;
 }
+
+export interface Order {
+  id: string;
+  stripeSessionId: string;
+  status: string;
+  totalCents: number;
+  subtotalCents: number;
+  shippingCents: number;
+  taxCents: number;
+  currency: string;
+  customerEmail: string;
+  customerName: string | null;
+  shippingAddress: unknown;
+  createdAt: string;
+  updatedAt: string;
+  items: OrderItem[];
+}
+
+export interface OrderItem {
+  id: string;
+  orderId: string;
+  sanityProductId: string;
+  priceId: string;
+  name: string;
+  imageUrl: string;
+  slug: string;
+  priceCents: number;
+  quantity: number;
+}
+
+export interface Address {
+  id: string;
+  userId: string;
+  label: string;
+  line1: string;
+  line2: string | null;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  isDefault: boolean;
+  createdAt: string;
+}
