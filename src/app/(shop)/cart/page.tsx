@@ -3,13 +3,13 @@
 import PageContainer from "@/components/layout/PageContainer"
 import Link from "next/link"
 import Image from "next/image";
-import { useShoppingCart } from "use-shopping-cart";
+import { useCart } from "@/features/cart/context/CartContext";
+import { CheckoutButton } from "@/features/cart/components/CheckoutButton";
 import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { ArrowRight, X } from "lucide-react";
-import { useState } from "react";
+import { X } from "lucide-react";
 
 export default function CartPage() {
   const {
@@ -19,46 +19,21 @@ export default function CartPage() {
     decrementItem,
     incrementItem,
     totalPrice,
-  } = useShoppingCart();
+    isHydrated,
+  } = useCart();
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  async function handleCheckoutClick(event: React.MouseEvent) {
-    event.preventDefault();
-    if (!cartDetails || cartCount === 0) return;
-    setIsLoading(true);
-    try {
-      const items = Object.values(cartDetails).map((entry) => ({
-        price_id: entry.price_id as string,
-        quantity: entry.quantity,
-      }));
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        console.error("Checkout error:", data.error);
-      }
-    } catch (error) {
-      console.error("Checkout failed:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  // Cart state only exists after localStorage is read.
+  const count = isHydrated ? cartCount : 0;
 
   return (
     <PageContainer>
       <section>
         <h1 className="text-3xl font-bold text-foreground sm:text-4xl mb-2">Your Cart</h1>
         <p className="text-sm text-muted-foreground mb-8">
-          {cartCount === 0 ? "No items" : `${cartCount} ${cartCount === 1 ? "item" : "items"}`}
+          {count === 0 ? "No items" : `${count} ${count === 1 ? "item" : "items"}`}
         </p>
 
-        {cartCount === 0 ? (
+        {count === 0 ? (
           <EmptyState
             title="Your cart is empty"
             description="Looks like you haven't added anything yet."
@@ -137,8 +112,8 @@ export default function CartPage() {
                 <h2 className="text-lg font-semibold text-foreground">Order Summary</h2>
                 <Separator />
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal ({cartCount} {cartCount === 1 ? "item" : "items"})</span>
-                  <span className="font-medium text-foreground">{formatPrice(totalPrice ?? 0)}</span>
+                  <span className="text-muted-foreground">Subtotal ({count} {count === 1 ? "item" : "items"})</span>
+                  <span className="font-medium text-foreground">{formatPrice(totalPrice)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Shipping</span>
@@ -147,11 +122,9 @@ export default function CartPage() {
                 <Separator />
                 <div className="flex justify-between font-semibold">
                   <span className="text-foreground">Total</span>
-                  <span className="text-foreground">{formatPrice(totalPrice ?? 0)}</span>
+                  <span className="text-foreground">{formatPrice(totalPrice)}</span>
                 </div>
-                <Button className="w-full" size="lg" onClick={handleCheckoutClick} disabled={isLoading}>
-                  {isLoading ? "Redirecting…" : "Checkout"} <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <CheckoutButton className="w-full" size="lg" withArrow />
                 <Button variant="outline" className="w-full" asChild>
                   <Link href="/products">Continue Shopping</Link>
                 </Button>

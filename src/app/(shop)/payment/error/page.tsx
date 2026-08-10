@@ -15,12 +15,12 @@ function ErrorPage() {
           <div className="space-y-2">
             <h2 className="text-2xl font-bold text-foreground">Payment Unsuccessful</h2>
             <p className="text-muted-foreground">
-              Something went wrong with your payment. You can try again.
+              Your payment was not completed. Your cart has been kept, so you can try again.
             </p>
           </div>
           <div className="flex flex-col gap-3 w-full">
             <Button asChild size="lg">
-              <Link href="/categories">Try Again</Link>
+              <Link href="/cart">Back to Cart</Link>
             </Button>
             <Button asChild variant="outline" size="lg">
               <Link href="/">Go Home</Link>

@@ -57,12 +57,11 @@ export default function ProductCard({ product, badgeLabel = "Sale" }: ProductCar
       {/* Add to cart — always visible on mobile, hover-reveal on desktop */}
       <div className="px-3 pb-3 pt-0 sm:opacity-0 sm:translate-y-1 sm:group-hover:opacity-100 sm:group-hover:translate-y-0 transition-all duration-200">
         <AddToCartButton
-          currency="USD"
+          id={product.slug}
           description=""
           image={product.imageUrl}
           name={product.name}
           price={product.price}
-          price_id={product.price_id}
           className="w-full"
         />
       </div>

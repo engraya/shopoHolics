@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import CartProvider from "@/components/providers/CartProvider";
@@ -13,9 +13,28 @@ const inter = Inter({
   display: "swap",
 });
 
+// Pairs with Inter for the mono half of the type system — eyebrows, counters,
+// order references and status chips. Only the weights those uses need.
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Shopoholics",
   description: "Modern Ecommerce Application",
+  applicationName: "Shopoholics",
+  appleWebApp: { title: "Shopoholics", capable: true, statusBarStyle: "default" },
+};
+
+// Tints the browser/OS chrome to match the brand mark.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0d14" },
+  ],
 };
 
 export default function RootLayout({
@@ -25,7 +44,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn(inter.variable, "font-sans antialiased")}>
+      <body className={cn(inter.variable, jetbrainsMono.variable, "font-sans antialiased")}>
         <SessionProvider>
           <CartProvider>
             <ThemeProvider

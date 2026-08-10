@@ -1,54 +1,126 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
 import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { getProductBySlug } from "@/lib/api/queries";
+import { buildReference, initializeTransaction, nairaToKobo } from "@/lib/paystack";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-10-16",
-});
+export const runtime = "nodejs";
 
-interface CartLineItem {
-  name: string;
-  price: number;
-  currency: string;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_QUANTITY = 99;
+const MAX_LINES = 50;
+/** Paystack rejects anything under 100 kobo (₦1). */
+const MIN_TOTAL_KOBO = 100;
+
+interface RequestItem {
+  id: string;
   quantity: number;
 }
 
 export async function POST(req: Request) {
+  let order: { id: string } | null = null;
+
   try {
     const session = await auth().catch(() => null);
-    const { items }: { items: CartLineItem[] } = await req.json();
+    const body = (await req.json()) as { email?: string; items?: RequestItem[] };
 
-    if (!items || items.length === 0) {
-      return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
+    // The client never sends prices — every amount below is derived server-side.
+    const email = (session?.user?.email ?? body.email ?? "").trim().toLowerCase();
+    if (!EMAIL_RE.test(email)) {
+      return NextResponse.json({ error: "A valid email address is required" }, { status: 400 });
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+    // Collapse duplicate ids and clamp quantities before touching the catalogue.
+    const quantityById = new Map<string, number>();
+    for (const item of body.items ?? []) {
+      if (!item?.id || typeof item.id !== "string") continue;
+      const qty = Math.trunc(Number(item.quantity));
+      if (!Number.isFinite(qty) || qty < 1) continue;
+      const next = (quantityById.get(item.id) ?? 0) + qty;
+      quantityById.set(item.id, Math.min(next, MAX_QUANTITY));
+    }
 
-    const checkoutSession = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      mode: "payment",
-      line_items: items.map((item) => ({
-        price_data: {
-          currency: item.currency.toLowerCase(),
-          unit_amount: Math.round(item.price * 100),
-          product_data: { name: item.name },
-        },
-        quantity: item.quantity,
-      })),
-      success_url: `${baseUrl}/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/stripe/error`,
-      customer_email: session?.user?.email ?? undefined,
-      metadata: {
-        userId: session?.user?.id ?? "guest",
-      },
-      shipping_address_collection: {
-        allowed_countries: ["US", "CA", "GB", "AU"],
-      },
+    if (quantityById.size === 0) {
+      return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
+    }
+    if (quantityById.size > MAX_LINES) {
+      return NextResponse.json({ error: "Too many items in cart" }, { status: 400 });
+    }
+
+    const ids = Array.from(quantityById.keys());
+    const products = await Promise.all(ids.map((id) => getProductBySlug(id)));
+
+    if (products.some((p) => p === null)) {
+      return NextResponse.json(
+        { error: "One or more products are no longer available" },
+        { status: 400 }
+      );
+    }
+
+    const lines = products.map((product) => {
+      const p = product!;
+      return {
+        productId: p._id,
+        slug: p.slug,
+        name: p.name,
+        imageUrl: p.images[0] ?? "",
+        priceCents: nairaToKobo(p.price),
+        quantity: quantityById.get(p.slug)!,
+      };
     });
 
-    return NextResponse.json({ url: checkoutSession.url });
+    const totalCents = lines.reduce((sum, l) => sum + l.priceCents * l.quantity, 0);
+    if (totalCents < MIN_TOTAL_KOBO) {
+      return NextResponse.json({ error: "Order total is too low" }, { status: 400 });
+    }
+
+    const reference = buildReference();
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+
+    // Persist the basket before redirecting: Paystack's webhook carries no line
+    // items, so this row is the record of what was actually ordered.
+    order = await db.$transaction(async (tx) => {
+      const created = await tx.order.create({
+        data: {
+          paystackReference: reference,
+          userId: session?.user?.id ?? null,
+          customerEmail: email,
+          customerName: session?.user?.name ?? null,
+          subtotalCents: totalCents,
+          totalCents,
+          currency: "NGN",
+          status: "PENDING",
+        },
+      });
+
+      await tx.orderItem.createMany({
+        data: lines.map((line) => ({ ...line, orderId: created.id })),
+      });
+
+      return created;
+    });
+
+    const paystack = await initializeTransaction({
+      email,
+      amountKobo: totalCents,
+      reference,
+      callbackUrl: `${baseUrl}/payment/success`,
+      metadata: { orderId: order.id, userId: session?.user?.id ?? "guest" },
+    });
+
+    return NextResponse.json({
+      authorization_url: paystack.authorization_url,
+      reference,
+      totalCents,
+    });
   } catch (err) {
     console.error("Checkout error:", err);
-    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 });
+
+    // Paystack never saw this order — don't leave a phantom PENDING row behind.
+    if (order) {
+      await db.order.delete({ where: { id: order.id } }).catch(() => {});
+    }
+
+    return NextResponse.json({ error: "Failed to start checkout" }, { status: 502 });
   }
 }

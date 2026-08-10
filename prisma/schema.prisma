@@ -31,10 +31,12 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts  Account[]
-  sessions  Session[]
-  addresses Address[]
-  orders    Order[]
+  accounts    Account[]
+  sessions    Session[]
+  addresses   Address[]
+  orders      Order[]
+  reviews     Review[]
+  reviewVotes ReviewVote[]
 
   @@map("users")
 }
@@ -97,41 +99,161 @@ model Address {
   @@map("addresses")
 }
 
+/// Money is stored in minor units (kobo). 1 NGN = 100. The `*Cents` column
+/// names are historical; they hold kobo.
 model Order {
   id                    String      @id @default(cuid())
   userId                String?
-  stripeSessionId       String      @unique
-  stripePaymentIntentId String?
+  paystackReference     String      @unique
+  paystackTransactionId String?
   status                OrderStatus @default(PENDING)
   subtotalCents         Int
   shippingCents         Int         @default(0)
   taxCents              Int         @default(0)
   totalCents            Int
-  currency              String      @default("usd")
+  currency              String      @default("NGN")
   customerEmail         String
   customerName          String?
   shippingAddress       Json?
   createdAt             DateTime    @default(now())
   updatedAt             DateTime    @updatedAt
 
+  /// Set whenever `status` changes; drives the shipped/delivered emails.
+  statusUpdatedAt     DateTime  @default(now())
+  /// Stamped once the review-request email goes out, so the cron is idempotent.
+  reviewRequestSentAt DateTime?
+
   user  User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   items OrderItem[]
 
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([customerEmail])
   @@map("orders")
 }
 
+/// `name`/`imageUrl`/`slug`/`priceCents` are snapshotted at purchase time on
+/// purpose: an order line is a financial record and must survive the product
+/// being edited or deleted. That is also why `productId` is nullable with
+/// SetNull rather than a hard FK — Restrict would block product deletion
+/// forever, and Cascade would silently destroy order history.
 model OrderItem {
-  id              String @id @default(cuid())
-  orderId         String
-  sanityProductId String
-  priceId         String
-  name            String
-  imageUrl        String
-  slug            String
-  priceCents      Int
-  quantity        Int
+  id         String  @id @default(cuid())
+  orderId    String
+  productId  String?
+  name       String
+  imageUrl   String
+  slug       String
+  priceCents Int
+  quantity   Int
 
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 
+  @@index([orderId])
+  @@index([productId])
   @@map("order_items")
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  imageUrl  String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String @id @default(cuid())
+  slug        String @unique
+  name        String
+  description String @db.Text
+
+  /// Minor units (kobo). The CANONICAL price — /api/checkout re-prices every
+  /// line from this column, so a tampered client payload cannot change totals.
+  priceCents Int
+  /// Optional strike-through price. Replaces the hardcoded `price * 1.3`.
+  compareAtCents Int?
+  currency       String @default("NGN")
+
+  images    String[]
+  thumbnail String
+  stock     Int      @default(0)
+  isActive  Boolean  @default(true)
+  /// dummyjson id, so re-running the seed updates rather than duplicates.
+  sourceId  String?  @unique
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  /// Denormalized review aggregates. Recomputed inside the same transaction as
+  /// every review write (see recomputeProductRating) — never written elsewhere.
+  ratingAvg   Float @default(0)
+  ratingCount Int   @default(0)
+  rating5     Int   @default(0)
+  rating4     Int   @default(0)
+  rating3     Int   @default(0)
+  rating2     Int   @default(0)
+  rating1     Int   @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reviews    Review[]
+  orderItems OrderItem[]
+
+  @@index([categoryId])
+  @@index([isActive, createdAt(sort: Desc)])
+  @@index([ratingAvg(sort: Desc)])
+  @@map("products")
+}
+
+model Review {
+  id        String  @id @default(cuid())
+  productId String
+  userId    String
+  /// 1..5, validated in the server action.
+  rating    Int
+  title     String?
+  body      String  @db.Text
+  /// Snapshotted at write time by checking the author's delivered orders.
+  isVerifiedPurchase Boolean @default(false)
+  helpfulCount       Int     @default(0)
+  notHelpfulCount    Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  votes   ReviewVote[]
+
+  /// One review per user per product — this compound is what lets the server
+  /// action treat "write" and "edit" as a single upsert.
+  @@unique([productId, userId])
+  @@index([productId, createdAt(sort: Desc)])
+  @@index([productId, helpfulCount(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("reviews")
+}
+
+model ReviewVote {
+  id        String   @id @default(cuid())
+  reviewId  String
+  userId    String
+  isHelpful Boolean
+  createdAt DateTime @default(now())
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// One vote per user per review; re-voting the same way toggles it off.
+  @@unique([reviewId, userId])
+  @@index([reviewId])
+  @@map("review_votes")
 }

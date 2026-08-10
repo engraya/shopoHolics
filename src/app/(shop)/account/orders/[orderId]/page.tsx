@@ -34,7 +34,7 @@ function ShippingAddressBlock({ data }: { data: unknown }) {
   );
 }
 import { OrderStatusBadge } from "@/features/orders/components/OrderStatusBadge";
-import { formatPrice } from "@/lib/utils";
+import { formatMinor } from "@/lib/utils";
 import Link from "next/link";
 import { ArrowLeft, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -108,12 +108,12 @@ export default async function OrderDetailPage({
                     <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    {formatPrice(item.priceCents)} × {item.quantity}
+                    {formatMinor(item.priceCents)} × {item.quantity}
                   </p>
                 </div>
               </div>
               <span className="font-semibold text-foreground flex-shrink-0">
-                {formatPrice(item.priceCents * item.quantity)}
+                {formatMinor(item.priceCents * item.quantity)}
               </span>
             </div>
           ))}
@@ -126,24 +126,24 @@ export default async function OrderDetailPage({
         <Separator />
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Subtotal</span>
-          <span>{formatPrice(order.subtotalCents)}</span>
+          <span>{formatMinor(order.subtotalCents)}</span>
         </div>
         {order.shippingCents > 0 && (
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Shipping</span>
-            <span>{formatPrice(order.shippingCents)}</span>
+            <span>{formatMinor(order.shippingCents)}</span>
           </div>
         )}
         {order.taxCents > 0 && (
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Tax</span>
-            <span>{formatPrice(order.taxCents)}</span>
+            <span>{formatMinor(order.taxCents)}</span>
           </div>
         )}
         <Separator />
         <div className="flex justify-between font-bold">
           <span>Total</span>
-          <span>{formatPrice(order.totalCents)}</span>
+          <span>{formatMinor(order.totalCents)}</span>
         </div>
       </div>
 

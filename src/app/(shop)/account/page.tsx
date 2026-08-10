@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { formatMinor } from "@/lib/utils";
 import Link from "next/link";
 import { Package, MapPin, User } from "lucide-react";
 import type { Metadata } from "next";
@@ -77,7 +78,7 @@ export default async function AccountPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-semibold text-foreground">
-                    {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(order.totalCents / 100)}
+                    {formatMinor(order.totalCents)}
                   </p>
                   <p className="text-xs text-muted-foreground capitalize">{order.status.toLowerCase()}</p>
                 </div>

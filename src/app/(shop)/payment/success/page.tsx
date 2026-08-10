@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useRef, useState, Suspense } from "react";
 import PageContainer from "@/components/layout/PageContainer";
 import Link from "next/link";
 import { CheckCircle, ShoppingBag, Package } from "lucide-react";
-import { useShoppingCart } from "use-shopping-cart";
-import { runFireworks } from "@/lib/utils";
+import { useCart } from "@/features/cart/context/CartContext";
+import { runFireworks } from "@/lib/confetti";
 import { Button } from "@/components/ui/button";
-import { formatPrice } from "@/lib/utils";
-import { useSearchParams } from "next/navigation";
+import { formatMinor } from "@/lib/utils";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface OrderItem {
   id: string;
@@ -26,47 +26,63 @@ interface Order {
 }
 
 function SuccessContent() {
-  const { clearCart } = useShoppingCart();
+  const { clearCart } = useCart();
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get("session_id");
+  // Paystack appends both `reference` and `trxref` to the callback URL.
+  const reference = searchParams.get("reference") ?? searchParams.get("trxref");
 
   const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(!!sessionId);
+  const [loading, setLoading] = useState(true);
+  const hasVerified = useRef(false);
 
   useEffect(() => {
-    clearCart();
-    runFireworks();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (hasVerified.current) return;
+    hasVerified.current = true;
 
-  useEffect(() => {
-    if (!sessionId) return;
+    if (!reference) {
+      router.replace("/payment/error");
+      return;
+    }
 
-    let attempts = 0;
-    const maxAttempts = 6;
-
-    async function poll() {
+    async function verify() {
       try {
-        const res = await fetch(`/api/orders/by-session/${sessionId}`);
-        if (res.ok) {
-          const data = await res.json();
-          setOrder(data);
-          setLoading(false);
+        const res = await fetch("/api/payments/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reference }),
+        });
+        const data = await res.json();
+
+        // Paystack has no cancel URL, so an abandoned payment lands here too —
+        // only celebrate once the transaction is confirmed successful.
+        if (!res.ok || data.status !== "success") {
+          router.replace("/payment/error");
           return;
         }
-      } catch {
-        // ignore
-      }
 
-      attempts++;
-      if (attempts < maxAttempts) {
-        setTimeout(poll, 1500);
-      } else {
+        setOrder(data.order ?? null);
         setLoading(false);
+        clearCart();
+        runFireworks();
+      } catch {
+        router.replace("/payment/error");
       }
     }
 
-    poll();
-  }, [sessionId]);
+    void verify();
+  }, [reference, router, clearCart]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Confirming your payment…</p>
+        </div>
+      </div>
+    );
+  }
 
   const shortId = order?.id.slice(-8).toUpperCase();
 
@@ -103,21 +119,14 @@ function SuccessContent() {
                   {item.name} × {item.quantity}
                 </span>
                 <span className="font-medium text-foreground">
-                  {formatPrice(item.priceCents * item.quantity)}
+                  {formatMinor(item.priceCents * item.quantity)}
                 </span>
               </div>
             ))}
             <div className="border-t border-border pt-3 flex justify-between font-semibold">
               <span>Total</span>
-              <span>{formatPrice(order.totalCents)}</span>
+              <span>{formatMinor(order.totalCents)}</span>
             </div>
-          </div>
-        )}
-
-        {loading && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            Loading order details…
           </div>
         )}
 

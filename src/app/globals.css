@@ -2,67 +2,111 @@
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * Colour system — cyan accent on a blue-black canvas.
+ *
+ * Dark mode is the reference theme: a blue-tinted near-black ground, one step
+ * of elevation for surfaces, and a lavender-grey text ramp. Light mode is the
+ * same hues inverted, not a separate palette.
+ *
+ * Semantic hues (--success/--info/--warning/--danger) are declared as bare
+ * `H S% L%` triples and consumed through Tailwind's slash-alpha at three
+ * levels: solid for text, /12 for the fill, /30 for the hairline border. That
+ * triad is what keeps status chips reading as one system instead of four
+ * unrelated colours — always use the alphas rather than hand-mixing new stops.
+ *
+ * --info sits at a desaturated slate-blue so it stays distinguishable from the
+ * saturated cyan of --primary.
+ */
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 229 33% 8%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 229 33% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 229 33% 8%;
 
-    --primary: 262 83% 58%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 193 90% 42%;
+    --primary-foreground: 229 33% 6%;
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 228 20% 96%;
+    --secondary-foreground: 229 25% 12%;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 228 20% 96%;
+    --muted-foreground: 228 12% 44%;
 
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 228 20% 96%;
+    --accent-foreground: 229 25% 12%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 358 70% 48%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 262 83% 58%;
+    --border: 228 18% 89%;
+    --input: 228 18% 89%;
+    --ring: 193 90% 42%;
 
-    --radius: 0.75rem;
+    --success: 153 62% 32%;
+    --info: 222 45% 42%;
+    --warning: 35 84% 36%;
+    --danger: 358 70% 48%;
+
+    --radius: 1rem;
+
+    /* Brand gradient stops — used for hero glows, gradient text and CTAs */
+    --brand-from: 193 90% 45%;
+    --brand-via: 202 88% 44%;
+    --brand-to: 172 78% 38%;
+
+    /*
+     * Ink for anything sitting *on* a brand fill. The gradient is cyan-to-teal
+     * in both themes, and white text over it lands around 2:1 — so brand chips
+     * and icon tiles take dark ink in light mode as well as dark.
+     */
+    --brand-ink: 229 33% 6%;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 229 33% 6%;
+    --foreground: 0 0% 100%;
 
-    --card: 240 10% 6%;
-    --card-foreground: 0 0% 98%;
+    --card: 231 27% 10%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 240 10% 6%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 231 27% 10%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 263 70% 70%;
-    --primary-foreground: 240 10% 3.9%;
+    --primary: 192 92% 60%;
+    --primary-foreground: 229 33% 6%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 230 22% 14%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 230 22% 14%;
+    --muted-foreground: 228 19% 70%;
 
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 230 22% 14%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 358 65% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 263 70% 70%;
+    --border: 230 22% 16%;
+    --input: 230 22% 16%;
+    --ring: 192 92% 60%;
+
+    --success: 153 60% 53%;
+    --info: 222 45% 66%;
+    --warning: 38 72% 63%;
+    --danger: 358 86% 64%;
+
+    --brand-from: 192 92% 62%;
+    --brand-via: 202 88% 62%;
+    --brand-to: 170 70% 55%;
+
+    --brand-ink: 229 33% 6%;
   }
 }
 
@@ -73,10 +117,92 @@
   body {
     @apply bg-background text-foreground;
   }
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Brand gradient — shared by hero glows, headings and CTAs */
+  .bg-gradient-brand {
+    background-image: linear-gradient(
+      100deg,
+      hsl(var(--brand-from)),
+      hsl(var(--brand-via)),
+      hsl(var(--brand-to))
+    );
+  }
+
+  .text-gradient-brand {
+    background-image: linear-gradient(
+      100deg,
+      hsl(var(--brand-from)),
+      hsl(var(--brand-via)),
+      hsl(var(--brand-to))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* keep descenders from being clipped by the text-crop */
+    padding-bottom: 0.08em;
+  }
+
+  /* Faint graph-paper backdrop for hero / feature bands */
+  .bg-grid {
+    background-image: linear-gradient(
+        to right,
+        hsl(var(--foreground) / 0.045) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        hsl(var(--foreground) / 0.045) 1px,
+        transparent 1px
+      );
+    background-size: 56px 56px;
+  }
+
+  /* Soft edge fade for horizontally scrolling strips */
+  .mask-fade-x {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 6%,
+      black 94%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 6%,
+      black 94%,
+      transparent
+    );
+  }
+
+  .glass {
+    background-color: hsl(var(--card) / 0.72);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  /* Pause an infinite marquee while the pointer rests on it */
+  .marquee-group:hover [data-marquee-track] {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

@@ -2,6 +2,21 @@ import type { Product, ProductSummary, Category } from '@/types';
 
 const BASE_URL = 'https://dummyjson.com';
 
+/**
+ * dummyjson prices are notional USD figures (e.g. 9.99). Scale them into
+ * plausible Naira so they clear Paystack's minimum charge.
+ *
+ * This is the single conversion point: `/api/checkout` re-resolves prices
+ * through the same adapters below, so the client and the server can never
+ * disagree about what a product costs.
+ */
+export const NGN_PRICE_MULTIPLIER = 1500;
+
+/** Whole Naira, always an integer so kobo conversion is exact. */
+function toNaira(usdish: number): number {
+  return Math.round(usdish * NGN_PRICE_MULTIPLIER);
+}
+
 export const PRODUCTS_REVALIDATE = 60;
 export const CATEGORIES_REVALIDATE = 300;
 export const PRODUCT_DETAIL_REVALIDATE = 60;
@@ -32,11 +47,10 @@ function adaptSummary(p: DummyProduct): ProductSummary {
   return {
     _id: String(p.id),
     imageUrl: p.thumbnail,
-    price: p.price,
+    price: toNaira(p.price),
     slug: String(p.id),
     categoryName: toDisplayName(p.category),
     name: p.title,
-    price_id: `price_mock_${p.id}`,
   };
 }
 
@@ -44,12 +58,11 @@ function adaptProduct(p: DummyProduct): Product {
   return {
     _id: String(p.id),
     images: p.images.length > 0 ? p.images : [p.thumbnail],
-    price: p.price,
+    price: toNaira(p.price),
     slug: String(p.id),
     categoryName: toDisplayName(p.category),
     name: p.title,
     description: p.description,
-    price_id: `price_mock_${p.id}`,
   };
 }
 

@@ -9,8 +9,8 @@ import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
-import { useShoppingCart } from "use-shopping-cart";
-import { useState } from "react";
+import { useCart } from "@/features/cart/context/CartContext";
+import { CheckoutButton } from "./CheckoutButton";
 
 export function CartSheet() {
   const {
@@ -20,47 +20,23 @@ export function CartSheet() {
     decrementItem,
     incrementItem,
     totalPrice,
-  } = useShoppingCart();
+    isCartOpen,
+    setCartOpen,
+    isHydrated,
+  } = useCart();
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  async function handleCheckoutClick(event: React.MouseEvent) {
-    event.preventDefault();
-    if (!cartDetails || cartCount === 0) return;
-    setIsLoading(true);
-    try {
-      const items = Object.values(cartDetails).map((entry) => ({
-        name: entry.name,
-        price: entry.price,
-        currency: entry.currency ?? "USD",
-        quantity: entry.quantity,
-      }));
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        console.error("Checkout error:", data.error);
-      }
-    } catch (error) {
-      console.error("Checkout failed:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  // Cart state only exists after localStorage is read, so the badge and totals
+  // render as empty on the server pass to keep hydration consistent.
+  const count = isHydrated ? cartCount : 0;
 
   return (
-    <Sheet>
+    <Sheet open={isCartOpen} onOpenChange={setCartOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label={`Cart with ${cartCount ?? 0} items`} className="relative">
+        <Button variant="ghost" size="icon" aria-label={`Cart with ${count} items`} className="relative">
           <ShoppingCart className="h-5 w-5" />
-          {cartCount !== undefined && cartCount > 0 && (
+          {count > 0 && (
             <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-              {cartCount > 99 ? "99+" : cartCount}
+              {count > 99 ? "99+" : count}
             </span>
           )}
         </Button>
@@ -69,13 +45,13 @@ export function CartSheet() {
       <SheetContent className="overflow-y-auto max-h-screen flex flex-col">
         <SheetTitle className="flex items-center gap-2 mb-4">
           Shopping Cart
-          {cartCount !== undefined && cartCount > 0 && (
-            <Badge variant="secondary">{cartCount} {cartCount === 1 ? "item" : "items"}</Badge>
+          {count > 0 && (
+            <Badge variant="secondary">{count} {count === 1 ? "item" : "items"}</Badge>
           )}
         </SheetTitle>
 
         <div className="flex-1 flex flex-col">
-          {cartCount === 0 ? (
+          {count === 0 ? (
             <EmptyState
               title="Your cart is empty"
               description="Add some products to get started"
@@ -131,7 +107,7 @@ export function CartSheet() {
                       </button>
                     </div>
                     <p className="mt-2 text-sm font-semibold text-foreground">
-                      {formatPrice(entry.price * (entry.quantity ?? 1))}
+                      {formatPrice(entry.price * entry.quantity)}
                     </p>
                   </div>
                 </div>
@@ -140,16 +116,14 @@ export function CartSheet() {
           )}
         </div>
 
-        {cartCount !== undefined && cartCount > 0 && (
+        {count > 0 && (
           <div className="mt-auto pt-4 space-y-3">
             <Separator />
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Subtotal</span>
-              <span className="text-base font-semibold text-foreground">{formatPrice(totalPrice ?? 0)}</span>
+              <span className="text-base font-semibold text-foreground">{formatPrice(totalPrice)}</span>
             </div>
-            <Button className="w-full" onClick={handleCheckoutClick} disabled={isLoading}>
-              {isLoading ? "Redirecting…" : "Checkout"}
-            </Button>
+            <CheckoutButton className="w-full" />
             <Button variant="outline" className="w-full" asChild>
               <Link href="/products">Continue Shopping</Link>
             </Button>

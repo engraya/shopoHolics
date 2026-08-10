@@ -22,9 +22,9 @@ interface Props {
   items: { name: string; quantity: number; priceCents: number }[];
 }
 
-function fmt(cents: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
-    cents / 100
+function fmt(minorUnits: number) {
+  return new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN" }).format(
+    minorUnits / 100
   );
 }
 

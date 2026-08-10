@@ -2,13 +2,13 @@
 
 # Shopoholics
 
-**A production-grade, full-stack e-commerce platform — headless CMS, real authentication, Stripe payments, order persistence, and transactional email out of the box.**
+**A production-grade, full-stack e-commerce platform — headless CMS, real authentication, Paystack payments, order persistence, and transactional email out of the box.**
 
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
-[![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://stripe.com/)
+[![Paystack](https://img.shields.io/badge/Paystack-Payments-00C3F7?style=for-the-badge&logo=paystack&logoColor=white)](https://paystack.com/)
 [![Sanity](https://img.shields.io/badge/Sanity-CMS-F03E2F?style=for-the-badge&logo=sanity&logoColor=white)](https://www.sanity.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
@@ -51,7 +51,7 @@ The project deliberately covers the parts most tutorials skip: what happens *aft
 
 ### The Problem It Solves
 
-Most e-commerce starters give you a product grid and a Stripe redirect. Shopoholics goes further — it's a fully wired system where a completed payment triggers a webhook, creates an order record in PostgreSQL, emails the customer a receipt, and surfaces the order in the user's account history. Everything connects.
+Most e-commerce starters give you a product grid and a payment redirect. Shopoholics goes further — it's a fully wired system where a completed payment triggers a webhook, creates an order record in PostgreSQL, emails the customer a receipt, and surfaces the order in the user's account history. Everything connects.
 
 ### Who It's For
 
@@ -78,8 +78,9 @@ Most e-commerce starters give you a product grid and a Stripe redirect. Shopohol
 - Persistent slide-out cart drawer accessible from any page (localStorage-backed)
 - Per-item quantity controls and individual item removal
 - Dedicated full cart page with live order summary
-- Stripe Checkout integration — hosted, PCI-compliant payment page
-- Shipping address collection (US, CA, GB, AU)
+- Paystack Checkout integration — hosted, PCI-compliant payment page
+- Guest checkout supported; Paystack requires an email, so guests are asked for one inline
+- Prices re-resolved server-side at checkout — the client never submits an amount
 - Confetti celebration animation on successful purchase
 - Payment error page with clear recovery options
 
@@ -94,7 +95,7 @@ Most e-commerce starters give you a product grid and a Stripe redirect. Shopohol
 
 ### Order Management
 
-- Stripe webhook listener (`checkout.session.completed`) persists orders to PostgreSQL
+- Paystack webhook listener (`charge.success`) confirms orders in PostgreSQL
 - Idempotency guard — duplicate webhooks do not create duplicate orders
 - Order history page in the user account dashboard
 - Per-order detail view with itemized breakdown and shipping address
@@ -148,8 +149,8 @@ Most e-commerce starters give you a product grid and a Stripe redirect. Shopohol
 | **ORM** | Prisma 7 with `@prisma/adapter-neon` |
 | **Authentication** | NextAuth v5 / Auth.js (Credentials + Google OAuth) |
 | **Password Hashing** | bcryptjs |
-| **Payments** | Stripe Checkout, Stripe Webhooks |
-| **Cart State** | use-shopping-cart v3 (localStorage-persisted) |
+| **Payments** | Paystack Checkout (redirect), Paystack Webhooks |
+| **Cart State** | Custom React context (localStorage-persisted) |
 | **Theme** | next-themes |
 | **Email** | Resend + React Email |
 | **Class Utilities** | clsx, tailwind-merge, class-variance-authority |
@@ -180,15 +181,15 @@ src/
 │   │   │   ├── orders/[orderId]/      # Per-order detail view
 │   │   │   ├── profile/
 │   │   │   └── addresses/
-│   │   └── stripe/                    # Post-checkout success and error pages
+│   │   └── payment/                   # Post-checkout success and error pages
 │   │
 │   └── api/
 │       ├── auth/[...nextauth]/        # NextAuth catch-all
-│       ├── checkout/                  # Creates Stripe Checkout session
+│       ├── checkout/                  # Writes PENDING order, initializes Paystack
+│       ├── payments/verify/           # Verifies + fulfils on callback return
 │       ├── orders/                    # Order history (authenticated)
-│       │   ├── [orderId]/             # Single order by DB ID
-│       │   └── by-session/[sessionId]/ # Order lookup by Stripe session
-│       └── webhooks/stripe/           # Stripe event handler
+│       │   └── [orderId]/             # Single order by DB ID
+│       └── webhooks/paystack/         # Paystack event handler
 │
 ├── components/
 │   ├── layout/                        # Navbar, Footer, PageContainer
@@ -225,7 +226,7 @@ Managed by Prisma. Models:
 | `Session` | NextAuth sessions |
 | `VerificationToken` | Email verification tokens |
 | `Address` | User-saved shipping addresses with `isDefault` flag |
-| `Order` | One order per Stripe session. Stores amounts in cents, customer info, and shipping address |
+| `Order` | One order per Paystack reference. Stores amounts in kobo (minor units) and customer info |
 | `OrderItem` | Individual line items within an order — name, slug, imageUrl, price, quantity |
 
 All monetary values are stored in **cents** to eliminate floating-point rounding errors.
@@ -238,7 +239,7 @@ All monetary values are stored in **cents** to eliminate floating-point rounding
 
 - Node.js 18+
 - A [Sanity](https://www.sanity.io/) project with `product` and `category` documents (or rely on the DummyJSON fallback for development)
-- A [Stripe](https://stripe.com/) account with products and price IDs created
+- A [Paystack](https://paystack.com/) account (test mode is fine)
 - A [Neon](https://neon.tech/) serverless PostgreSQL database
 - A [Google Cloud Console](https://console.cloud.google.com/) OAuth 2.0 client
 - A [Resend](https://resend.com/) account with a verified sender domain
@@ -280,15 +281,29 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### 5. Test Stripe Webhooks Locally
+### 5. Test Payments Locally
 
-Install the [Stripe CLI](https://stripe.com/docs/stripe-cli) and forward events to your local server:
+Use a Paystack **test** secret key (`sk_test_…`). Test card: `4084 0840 8408 4081`, any future expiry, CVV `408`, PIN `0000`, OTP `123456`.
+
+Paystack has no `stripe listen` equivalent, but you don't need one: `/api/payments/verify` fulfils the order on callback, so the whole flow works with **no webhook configured**.
+
+To exercise the webhook path specifically, expose your dev server and point Paystack at it:
 
 ```bash
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
+ngrok http 3000     # or: cloudflared tunnel --url http://localhost:3000
 ```
 
-Copy the webhook signing secret printed by the CLI into `STRIPE_WEBHOOK_SECRET` in your `.env`.
+Set the https URL as the Test Webhook URL in Paystack Dashboard → Settings → API Keys & Webhooks, **and** set `NEXT_PUBLIC_BASE_URL` to the same URL so the callback returns to the tunnel rather than `localhost`. Restart `npm run dev` after changing it.
+
+To replay a captured payload, sign it with the secret key — note `--data-binary`, since the HMAC is over exact bytes:
+
+```bash
+SIG=$(openssl dgst -sha512 -hmac "$PAYSTACK_SECRET_KEY" -hex < payload.json | awk '{print $2}')
+curl -X POST http://localhost:3000/api/webhooks/paystack \
+  -H "Content-Type: application/json" \
+  -H "x-paystack-signature: $SIG" \
+  --data-binary @payload.json
+```
 
 ### 6. Production Build
 
@@ -309,18 +324,14 @@ NEXT_PUBLIC_SANITY_PROJECT_ID=
 # Dataset name (default: production)
 NEXT_PUBLIC_SANITY_DATASET=production
 
-# ─── Stripe ────────────────────────────────────────────────────────────────────
-# Publishable key — safe to expose to the browser (pk_test_ or pk_live_)
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
-
-# Secret key — NEVER expose to the client (sk_test_ or sk_live_)
-STRIPE_SECRET_KEY=
-
-# Webhook signing secret — from Stripe Dashboard or `stripe listen` CLI output
-STRIPE_WEBHOOK_SECRET=
+# ─── Paystack ──────────────────────────────────────────────────────────────────
+# Secret key — NEVER expose to the client (sk_test_ or sk_live_).
+# This key also signs incoming webhooks; Paystack has no separate webhook secret.
+# The redirect flow never needs a public key.
+PAYSTACK_SECRET_KEY=
 
 # ─── Application ───────────────────────────────────────────────────────────────
-# Full canonical URL — used in Stripe redirect URLs and email links (no trailing slash)
+# Full canonical URL — used for the Paystack callback and email links (no trailing slash)
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 
 # ─── Database (Neon PostgreSQL) ────────────────────────────────────────────────
@@ -347,7 +358,7 @@ RESEND_API_KEY=
 RESEND_FROM_EMAIL=orders@yourdomain.com
 ```
 
-> **Security:** `NEXT_PUBLIC_` variables are inlined into the client bundle at build time. Never prefix secret keys or tokens with `NEXT_PUBLIC_`. The Stripe secret key and webhook secret are server-only and must remain in server-side environment variables.
+> **Security:** `NEXT_PUBLIC_` variables are inlined into the client bundle at build time. Never prefix secret keys or tokens with `NEXT_PUBLIC_`. This matters doubly for `PAYSTACK_SECRET_KEY` — it is both the API credential *and* the webhook signing key, so exposing it would let anyone forge a `charge.success` event.
 
 ---
 
@@ -376,8 +387,8 @@ RESEND_FROM_EMAIL=orders@yourdomain.com
 | `/product/[slug]` | Product detail — gallery, description, add to cart | — | 60s |
 | `/newest` | Latest arrivals with "New" badge | — | 120s |
 | `/cart` | Full cart review page | — | — |
-| `/stripe/success` | Order confirmation with confetti | — | — |
-| `/stripe/error` | Payment failure with recovery options | — | — |
+| `/payment/success` | Verifies the transaction, then confirms the order with confetti | — | — |
+| `/payment/error` | Payment failure with recovery options | — | — |
 | `/login` | Email/password login + Google OAuth | — | — |
 | `/register` | Account registration | — | — |
 | `/forgot-password` | Password reset request | — | — |
@@ -471,31 +482,36 @@ Errors from `AuthError` are mapped to user-facing messages before being returned
 
 ### Checkout
 
-The cart (managed by `use-shopping-cart`) collects Stripe `price_id` values from each product. On checkout, the cart calls `POST /api/checkout` with the line items:
+The cart (a custom React context in `src/features/cart/context/CartContext.tsx`) keys entries by product slug. On checkout it calls `POST /api/checkout` with **ids and quantities only** — no prices:
 
 ```
-POST /api/checkout  { items: [{ price_id, quantity }] }
-  → Stripe verifies prices server-side (client values are ignored)
-  → Stripe Checkout session created with success_url and cancel_url
-  → Response: { url: "https://checkout.stripe.com/pay/cs_..." }
-  → Client redirects to Stripe hosted page
+POST /api/checkout  { email, items: [{ id, quantity }] }
+  → Server re-resolves every price from the catalogue (client values ignored)
+  → PENDING order + items written to PostgreSQL
+  → Paystack transaction initialized (amount in kobo)
+  → Response: { authorization_url: "https://checkout.paystack.com/..." }
+  → Client redirects to Paystack hosted page
 ```
+
+Paystack requires a customer email on every transaction. Signed-in users' email is taken from the session; guests are asked for one inline before the redirect.
+
+Because Paystack's webhook payload carries **no line items**, the basket is persisted as a `PENDING` order *before* the redirect rather than round-tripped through transaction metadata. Fulfilment then only has to flip that row.
 
 ### Webhook
 
-On payment success, Stripe calls `POST /api/webhooks/stripe`:
+On payment success, Paystack calls `POST /api/webhooks/paystack`:
 
 ```
-Stripe sends checkout.session.completed event
-  → Validate Stripe-Signature header against STRIPE_WEBHOOK_SECRET
-  → Idempotency check: look for existing order with this stripeSessionId
-  → Retrieve full session with expand: ["line_items.data.price.product"]
-  → db.order.create() with all items, amounts, customer info, shipping address
-  → sendOrderConfirmationEmail() [non-blocking]
+Paystack sends charge.success event
+  → Verify x-paystack-signature: HMAC-SHA512 of the RAW body, keyed by the
+    secret key itself (Paystack has no separate webhook secret)
+  → Confirm the charged amount and currency match the PENDING order
+  → Atomic updateMany on status: PENDING → PROCESSING
+  → sendOrderConfirmationEmail() [non-blocking, only if we won the transition]
   → Return 200 OK
 ```
 
-The idempotency check means replayed webhooks (Stripe retries on non-2xx) never create duplicate orders.
+The atomic `updateMany` is the idempotency guard: only one caller can transition a `PENDING` row, so replayed webhooks — and a concurrent callback verification — can never duplicate an order or a receipt.
 
 ### Order Lifecycle
 
@@ -507,7 +523,11 @@ PENDING → PROCESSING → SHIPPED → DELIVERED
 
 ### Success Page
 
-After redirect to `/stripe/success?session_id=...`, the page calls `GET /api/orders/by-session/[sessionId]` to display the completed order and fires the confetti animation.
+**Paystack has no cancel URL.** Unlike Stripe, an abandoned or failed payment returns the browser to the *same* `callback_url` as a successful one — so the callback page has to establish the outcome itself.
+
+After redirect to `/payment/success?reference=...`, the page calls `POST /api/payments/verify`. That endpoint verifies the transaction with Paystack and fulfils the order inline, then the page either displays the order and fires confetti, or redirects to `/payment/error` if the payment did not succeed.
+
+Fulfilling inline here means checkout completes end-to-end **with no webhook configured at all** — which is what makes local development practical, and doubles as a safety net if the webhook is ever delayed.
 
 ---
 
@@ -518,7 +538,7 @@ Email is delivered via **[Resend](https://resend.com/)** using **React Email** t
 | Template | Trigger | File |
 |---|---|---|
 | `WelcomeEmail` | User registers | `register()` Server Action (non-blocking) |
-| `OrderConfirmation` | Payment webhook received | `POST /api/webhooks/stripe` (non-blocking) |
+| `OrderConfirmation` | Payment confirmed | `fulfillOrder()` (non-blocking) |
 
 Both sends are wrapped in `.catch(console.error)` — a failed email never blocks the primary operation (registration or order creation).
 
@@ -532,19 +552,30 @@ All API routes are under `src/app/api/`. Protected routes use `auth()` from `src
 
 ### `POST /api/checkout`
 
-Creates a Stripe Checkout session.
+Writes a `PENDING` order and initializes a Paystack transaction.
 
 | Detail | Value |
 |---|---|
-| Auth | Optional (guests allowed; authenticated users get `customer_email` pre-filled) |
-| Body | `{ items: Array<{ price_id: string; quantity: number }> }` |
-| Response | `{ url: string }` — Stripe hosted checkout URL |
+| Auth | Optional (guests allowed; authenticated users' email is taken from the session) |
+| Body | `{ email?: string; items: Array<{ id: string; quantity: number }> }` |
+| Response | `{ authorization_url: string; reference: string; totalCents: number }` |
 
-### `POST /api/webhooks/stripe`
+Prices are never accepted from the client — every amount is re-resolved server-side from the catalogue.
 
-Stripe event handler. Validates `Stripe-Signature` header before processing.
+### `POST /api/webhooks/paystack`
 
-Processes: `checkout.session.completed`
+Paystack event handler. Verifies the `x-paystack-signature` HMAC over the raw body before processing.
+
+Processes: `charge.success`
+
+### `POST /api/payments/verify`
+
+Verifies a transaction by reference and fulfils the order. Called by the payment callback page to distinguish a successful payment from an abandoned one.
+
+| Detail | Value |
+|---|---|
+| Body | `{ reference: string }` |
+| Response | `{ status: "success", order }` or `{ status: "abandoned" \| "failed" \| ... }` |
 
 ### `GET /api/orders`
 
@@ -559,9 +590,6 @@ Returns the authenticated user's full order history with nested items, ordered b
 
 Returns a single order by database ID, scoped to the authenticated user.
 
-### `GET /api/orders/by-session/[sessionId]`
-
-Looks up an order by Stripe `checkout.session.id`. Used by the success page immediately after checkout.
 
 ---
 
@@ -596,11 +624,12 @@ Looks up an order by Stripe `checkout.session.id`. Used by the success page imme
 ### Application Security
 
 - Passwords hashed with bcrypt at cost factor 12 — never stored in plain text
-- Stripe handles all card data on its PCI-compliant hosted page — raw card numbers never reach the application
-- Stripe webhook signature validated before any database writes
+- Paystack handles all card data on its PCI-compliant hosted page — raw card numbers never reach the application
+- Paystack webhook signature (HMAC-SHA512 over the raw body) validated before any database writes
 - Server Actions for auth mutations — credential validation runs entirely on the server
 - Only `NEXT_PUBLIC_` keys (non-secret) are accessible in the browser
-- Product prices resolved server-side by Stripe from `price_id` — client-submitted amounts are ignored
+- Product prices re-resolved server-side from the catalogue in `/api/checkout` — the client sends ids and quantities only, never amounts
+- Charged amount and currency re-checked against the stored order before fulfilment
 
 ---
 
@@ -651,15 +680,15 @@ Vercel provides zero-configuration Next.js hosting with automatic ISR and global
 npm i -g vercel && vercel
 ```
 
-### Stripe Webhook (Production)
+### Paystack Webhook (Production)
 
-In the Stripe Dashboard, create a webhook endpoint:
+In the Paystack Dashboard (Settings → API Keys & Webhooks), set the webhook URL:
 
 ```
-https://your-domain.com/api/webhooks/stripe
+https://your-domain.com/api/webhooks/paystack
 ```
 
-Subscribe to `checkout.session.completed`. Copy the signing secret into `STRIPE_WEBHOOK_SECRET`.
+The handler processes `charge.success`. There is no separate signing secret to copy — Paystack signs with your secret key, which is already in `PAYSTACK_SECRET_KEY`.
 
 ### Database
 
@@ -756,7 +785,7 @@ See the [LICENSE](LICENSE) file for full details.
 
 <div align="center">
 
-Built with [Next.js](https://nextjs.org/), [Prisma](https://www.prisma.io/), [Sanity](https://www.sanity.io/), [Stripe](https://stripe.com/), and [Resend](https://resend.com/)
+Built with [Next.js](https://nextjs.org/), [Prisma](https://www.prisma.io/), [Sanity](https://www.sanity.io/), [Paystack](https://paystack.com/), and [Resend](https://resend.com/)
 
 **[Back to top](#shopoholics)**
 

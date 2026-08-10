@@ -1,48 +1,25 @@
 import { type ClassValue, clsx } from "clsx";
-import confetti from 'canvas-confetti';
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatPrice(amount: number, currency = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
+/**
+ * Money convention for this app:
+ *   - Product prices and cart totals are WHOLE NAIRA  -> formatPrice()
+ *   - Anything named *Cents (DB columns, Paystack amounts) is in MINOR UNITS
+ *     i.e. kobo, where 1 NGN = 100 kobo                -> formatMinor()
+ * Rule of thumb: an identifier ending in `Cents` is never passed to formatPrice.
+ */
+export function formatPrice(amount: number, currency = 'NGN'): string {
+  return new Intl.NumberFormat('en-NG', {
     style: 'currency',
     currency,
   }).format(amount);
 }
 
-export const runFireworks = () => {
-  var duration = 5 * 1000;
-  var animationEnd = Date.now() + duration;
-  var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
-  function randomInRange(min: number, max: number) {
-    return Math.random() * (max - min) + min;
-  }
-
-  // Explicitly typing `interval` as `NodeJS.Timeout`
-  var interval: NodeJS.Timeout = setInterval(function () {
-    var timeLeft = animationEnd - Date.now();
-
-    if (timeLeft <= 0) {
-      return clearInterval(interval);
-    }
-
-    var particleCount = 50 * (timeLeft / duration);
-    // since particles fall down, start a bit higher than random
-    confetti(
-      Object.assign({}, defaults, {
-        particleCount,
-        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-      })
-    );
-    confetti(
-      Object.assign({}, defaults, {
-        particleCount,
-        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-      })
-    );
-  }, 250);
-};
+/** Format an amount held in minor units (kobo). */
+export function formatMinor(minorUnits: number, currency = 'NGN'): string {
+  return formatPrice(minorUnits / 100, currency);
+}
