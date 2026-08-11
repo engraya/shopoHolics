@@ -101,16 +101,26 @@ model Address {
 
 /// Money is stored in minor units (kobo). 1 NGN = 100. The `*Cents` column
 /// names are historical; they hold kobo.
+///
+/// Every money column is BigInt (int8), not Int: a 32-bit column tops out at
+/// 2,147,483,647 kobo — only ₦21.5M — which this catalogue passes on a single
+/// item, let alone a multi-unit order. Prisma types these as `bigint`; the app
+/// widens to `number` at the edges (see `serializeOrder` and `formatMinor`).
 model Order {
   id                    String      @id @default(cuid())
   userId                String?
   paystackReference     String      @unique
   paystackTransactionId String?
   status                OrderStatus @default(PENDING)
-  subtotalCents         Int
-  shippingCents         Int         @default(0)
-  taxCents              Int         @default(0)
-  totalCents            Int
+  subtotalCents         BigInt
+  shippingCents         BigInt      @default(0)
+  taxCents              BigInt      @default(0)
+  /// Promo discount applied to the subtotal. Stored rather than inferred so an
+  /// order stays a complete financial record even after the code is retired.
+  discountCents         BigInt      @default(0)
+  /// The code that produced `discountCents`, for support and reconciliation.
+  promoCode             String?
+  totalCents            BigInt
   currency              String      @default("NGN")
   customerEmail         String
   customerName          String?
@@ -143,7 +153,7 @@ model OrderItem {
   name       String
   imageUrl   String
   slug       String
-  priceCents Int
+  priceCents BigInt
   quantity   Int
 
   order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -176,9 +186,9 @@ model Product {
 
   /// Minor units (kobo). The CANONICAL price — /api/checkout re-prices every
   /// line from this column, so a tampered client payload cannot change totals.
-  priceCents Int
+  priceCents BigInt
   /// Optional strike-through price. Replaces the hardcoded `price * 1.3`.
-  compareAtCents Int?
+  compareAtCents BigInt?
   currency       String @default("NGN")
 
   images    String[]

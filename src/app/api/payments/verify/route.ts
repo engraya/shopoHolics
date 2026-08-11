@@ -50,7 +50,18 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ status: "success", order });
+    // BigInt money columns are not JSON-serializable — widen before replying.
+    return NextResponse.json({
+      status: "success",
+      order: order && {
+        ...order,
+        totalCents: Number(order.totalCents),
+        items: order.items.map((item) => ({
+          ...item,
+          priceCents: Number(item.priceCents),
+        })),
+      },
+    });
   } catch (err) {
     console.error("Payment verification error:", err);
     return NextResponse.json({ error: "Could not verify payment" }, { status: 502 });

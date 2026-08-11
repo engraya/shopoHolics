@@ -141,7 +141,7 @@ Most e-commerce starters give you a product grid and a payment redirect. Shopoho
 | **Styling** | Tailwind CSS 3.4, tailwindcss-animate |
 | **UI Components** | shadcn/ui, Radix UI |
 | **Icons** | Lucide React, Radix Icons |
-| **Fonts** | Inter via `next/font/google` |
+| **Fonts** | Inter + JetBrains Mono, self-hosted via `next/font/local` |
 | **Toasts** | Sonner |
 | **Animations** | canvas-confetti |
 | **CMS** | Sanity (headless) with DummyJSON dev fallback |
@@ -605,7 +605,7 @@ Returns a single order by database ID, scoped to the authenticated user.
 | **Next.js Image** | Automatic WebP/AVIF conversion, lazy loading, responsive `sizes` attributes |
 | **Neon serverless driver** | `@neondatabase/serverless` uses WebSockets — avoids TCP cold-start overhead in serverless |
 | **Prisma singleton** | Connection reused across hot reloads in development; no connection pool exhaustion |
-| **Font optimization** | Inter loaded via `next/font/google` with `display: swap` — no FOUT, self-hosted |
+| **Font optimization** | Variable woff2 files in `src/app/fonts/`, loaded via `next/font/local` with `display: swap` — no FOUT, no build-time network fetch |
 
 ---
 

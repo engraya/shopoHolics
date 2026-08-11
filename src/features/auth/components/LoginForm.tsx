@@ -7,7 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 
-export function LoginForm() {
+/**
+ * `callbackUrl` is threaded down from the page's searchParams rather than read
+ * with `useSearchParams` — a client hook here would force the whole auth route
+ * into a Suspense boundary for one string.
+ */
+export function LoginForm({ callbackUrl = "/" }: { callbackUrl?: string }) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -24,6 +29,7 @@ export function LoginForm() {
   return (
     <div className="space-y-6">
       <form onSubmit={handleSubmit} className="space-y-4">
+        <input type="hidden" name="callbackUrl" value={callbackUrl} />
         <div className="space-y-2">
           <label htmlFor="email" className="text-sm font-medium text-foreground">
             Email
@@ -84,7 +90,7 @@ export function LoginForm() {
         type="button"
         variant="outline"
         className="w-full"
-        onClick={() => signIn("google", { callbackUrl: "/" })}
+        onClick={() => signIn("google", { callbackUrl })}
       >
         <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
           <path
@@ -109,7 +115,10 @@ export function LoginForm() {
 
       <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="text-primary hover:underline font-medium">
+        <Link
+          href={`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+          className="text-primary hover:underline font-medium"
+        >
           Sign up
         </Link>
       </p>

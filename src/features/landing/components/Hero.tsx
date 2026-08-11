@@ -23,10 +23,12 @@ export default function Hero({ products }: { products: ProductSummary[] }) {
   const [first, second, third] = products;
 
   return (
-    // -mt-32 cancels both the sticky header's 4rem of flow height and the
-    // layout's own pt-16 spacer, so the glow sits behind the header instead of
-    // starting below it. The section's pt-24 keeps the copy clear of the bar.
-    <section className="relative isolate -mt-32 overflow-hidden">
+    // The header is `sticky h-16`, so it occupies 4rem of normal flow and
+    // nothing else adds a spacer — -mt-16 is the exact amount that pulls the
+    // section box up to y=0, putting the glow behind the bar rather than
+    // below it. Any more and the copy slides under the header.
+    // The gap the reader actually sees is pt-28/lg:pt-36 minus that 4rem.
+    <section className="relative isolate -mt-16 overflow-hidden">
       {/* Ambient backdrop: drifting brand glows over a faint grid */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
         <div className="absolute inset-0 bg-grid [mask-image:radial-gradient(ellipse_75%_60%_at_50%_0%,black,transparent)]" />
@@ -35,7 +37,7 @@ export default function Hero({ products }: { products: ProductSummary[] }) {
         <div className="absolute -bottom-56 left-1/3 h-[30rem] w-[30rem] rounded-full bg-[hsl(var(--brand-via)/0.16)] blur-3xl animate-drift [animation-delay:-13s]" />
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-4 pb-16 pt-24 sm:px-6 lg:grid-cols-2 lg:gap-8 lg:px-8 lg:pb-24 lg:pt-28">
+      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-4 pb-16 pt-28 sm:px-6 lg:grid-cols-2 lg:gap-8 lg:px-8 lg:pb-24 lg:pt-36">
         {/* ---------- Copy ---------- */}
         <div className="text-center lg:text-left">
           <Link

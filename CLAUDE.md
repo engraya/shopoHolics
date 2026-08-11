@@ -54,7 +54,7 @@ Pages and data-fetching components are server components (no directive). Mark a 
 
 ## Styling
 
-Tailwind utility-first throughout. Color system uses HSL CSS custom properties (`--primary`, `--muted`, `--accent`, etc.) with `dark:` variants toggled via class strategy. Custom animations: `fade-in` (0.15s), `accordion-down/up`. Font: Inter via `--font-inter` CSS variable.
+Tailwind utility-first throughout. Color system uses HSL CSS custom properties (`--primary`, `--muted`, `--accent`, etc.) with `dark:` variants toggled via class strategy. Custom animations: `fade-in` (0.15s), `accordion-down/up`. Fonts: Inter (`--font-inter`) and JetBrains Mono (`--font-mono`), self-hosted from `src/app/fonts/` through `next/font/local` in `src/app/layout.tsx` — variable woff2, latin subset. No `next/font/google`, so builds never touch the network.
 
 Merge classes with `cn()` from `src/lib/utils.ts` — never concatenate raw strings.
 
@@ -87,6 +87,13 @@ Paystack redirect flow, no SDK — two `fetch` calls and `node:crypto`.
 Both paths call `fulfillOrder()`, whose atomic `updateMany` on `status: PENDING` makes double-fulfilment impossible. The verify route means checkout works end-to-end with no webhook configured, which is what makes local development practical.
 
 **Money:** the DB `*Cents` columns and all Paystack amounts are **kobo** (integer minor units). Product and cart prices are **whole Naira**. Render `*Cents` values with `formatMinor()`, never `formatPrice()`. Catalogue prices are scaled by `NGN_PRICE_MULTIPLIER` in `src/lib/api/queries.ts` — the single conversion point, which is why client and server can't disagree on price.
+
+Every `*Cents` column is **`BigInt`**, not `Int`. A 32-bit column tops out at 2,147,483,647 kobo — only ₦21,474,836 — which the catalogue passes on a single item (a ₦55M car), never mind a multi-unit order. Prisma therefore types these fields as `bigint`, while the rest of the app works in `number` (exact to 2^53 kobo, about ₦90tn). Two rules follow:
+
+- `JSON.stringify` **throws** on a bigint. Any order leaving the server as JSON goes through `serializeOrder()` in `src/lib/orders/serialize.ts`.
+- Arithmetic and `>` comparisons against plain numbers need an explicit `Number(...)`; `formatMinor()` accepts either, so display-only sites can render a Prisma row directly.
+
+Writes need no conversion — Prisma accepts `number` for a `BigInt` field.
 
 ## Path Aliases
 

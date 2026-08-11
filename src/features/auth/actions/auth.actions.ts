@@ -5,11 +5,15 @@ import bcrypt from "bcryptjs";
 import { signIn } from "@/lib/auth";
 import { AuthError } from "next-auth";
 import { sendWelcomeEmail } from "@/lib/email/resend";
+import { safeCallbackUrl } from "@/lib/navigation";
 
 export async function register(formData: FormData) {
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  // Re-sanitized here rather than trusted from the form: the field is client
+  // input, and it is about to become a redirect target.
+  const redirectTo = safeCallbackUrl(formData.get("callbackUrl"));
 
   if (!name || !email || !password) {
     return { error: "All fields are required." };
@@ -33,15 +37,16 @@ export async function register(formData: FormData) {
   // Send welcome email (non-blocking)
   sendWelcomeEmail(email, name).catch(console.error);
 
-  await signIn("credentials", { email, password, redirectTo: "/" });
+  await signIn("credentials", { email, password, redirectTo });
 }
 
 export async function login(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const redirectTo = safeCallbackUrl(formData.get("callbackUrl"));
 
   try {
-    await signIn("credentials", { email, password, redirectTo: "/" });
+    await signIn("credentials", { email, password, redirectTo });
   } catch (err) {
     if (err instanceof AuthError) {
       switch (err.type) {

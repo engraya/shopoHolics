@@ -38,3 +38,21 @@ export function isActivePath(pathname: string, item: NavItem): boolean {
   if (matchesPrefix(pathname, item.href)) return true;
   return item.match?.some((prefix) => matchesPrefix(pathname, prefix)) ?? false;
 }
+
+export const DEFAULT_REDIRECT = "/";
+
+/**
+ * Sanitizes a `?callbackUrl=` before it reaches `signIn({ redirectTo })`.
+ *
+ * Anything that isn't a single-slash-rooted path is discarded, which rejects
+ * absolute URLs (`https://evil.test`), scheme-relative ones (`//evil.test`),
+ * and backslash variants that some parsers normalize into `//`. Without this,
+ * the sign-in page is an open redirect that any link can aim wherever it likes.
+ */
+export function safeCallbackUrl(value: unknown): string {
+  if (typeof value !== "string") return DEFAULT_REDIRECT;
+  const trimmed = value.trim();
+  if (!trimmed.startsWith("/")) return DEFAULT_REDIRECT;
+  if (trimmed.startsWith("//") || trimmed.startsWith("/\\")) return DEFAULT_REDIRECT;
+  return trimmed;
+}

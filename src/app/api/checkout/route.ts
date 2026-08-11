@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getProductBySlug } from "@/lib/api/queries";
 import { buildReference, initializeTransaction, nairaToKobo } from "@/lib/paystack";
+import { computeCartTotals } from "@/lib/cart/pricing";
 
 export const runtime = "nodejs";
 
@@ -22,7 +23,11 @@ export async function POST(req: Request) {
 
   try {
     const session = await auth().catch(() => null);
-    const body = (await req.json()) as { email?: string; items?: RequestItem[] };
+    const body = (await req.json()) as {
+      email?: string;
+      items?: RequestItem[];
+      promoCode?: string;
+    };
 
     // The client never sends prices — every amount below is derived server-side.
     const email = (session?.user?.email ?? body.email ?? "").trim().toLowerCase();
@@ -69,7 +74,15 @@ export async function POST(req: Request) {
       };
     });
 
-    const totalCents = lines.reduce((sum, l) => sum + l.priceCents * l.quantity, 0);
+    const subtotalCents = lines.reduce((sum, l) => sum + l.priceCents * l.quantity, 0);
+
+    // Same function the cart summary renders from, so the figure the customer
+    // agreed to is the figure Paystack is asked for. The client's promo code is
+    // only a suggestion — an invalid or ineligible one degrades to no discount
+    // here rather than being taken at face value.
+    const totals = computeCartTotals(subtotalCents, body.promoCode);
+    const totalCents = totals.totalKobo;
+
     if (totalCents < MIN_TOTAL_KOBO) {
       return NextResponse.json({ error: "Order total is too low" }, { status: 400 });
     }
@@ -86,7 +99,10 @@ export async function POST(req: Request) {
           userId: session?.user?.id ?? null,
           customerEmail: email,
           customerName: session?.user?.name ?? null,
-          subtotalCents: totalCents,
+          subtotalCents,
+          shippingCents: totals.shippingKobo,
+          discountCents: totals.discountKobo,
+          promoCode: totals.promo?.code ?? null,
           totalCents,
           currency: "NGN",
           status: "PENDING",

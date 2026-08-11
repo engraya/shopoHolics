@@ -26,7 +26,10 @@ export async function fulfillOrder(txn: PaystackTransaction): Promise<FulfillRes
   if (!order) return { outcome: "not_found" };
 
   // Never fulfil an order for an amount the customer did not actually pay.
-  if (txn.currency !== order.currency || txn.amount !== order.totalCents) {
+  // `totalCents` is a BigInt column; Paystack reports kobo as a number.
+  const orderTotalKobo = Number(order.totalCents);
+
+  if (txn.currency !== order.currency || txn.amount !== orderTotalKobo) {
     console.error(
       `[paystack] Amount mismatch for ${txn.reference}: charged ${txn.amount} ${txn.currency}, order expects ${order.totalCents} ${order.currency}`
     );
@@ -56,11 +59,11 @@ export async function fulfillOrder(txn: PaystackTransaction): Promise<FulfillRes
       to: order.customerEmail,
       customerName: customerName ?? undefined,
       orderId: order.id,
-      totalCents: order.totalCents,
+      totalCents: orderTotalKobo,
       items: order.items.map((item) => ({
         name: item.name,
         quantity: item.quantity,
-        priceCents: item.priceCents,
+        priceCents: Number(item.priceCents),
       })),
     });
   } catch (emailErr) {

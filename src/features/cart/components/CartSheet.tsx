@@ -5,13 +5,21 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, formatMinor } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/features/cart/context/CartContext";
+import { computeCartTotals, KOBO_PER_NAIRA } from "@/lib/cart/pricing";
 import { CheckoutButton } from "./CheckoutButton";
+import { FreeShippingMeter } from "./FreeShippingMeter";
+import { QuantityStepper } from "./QuantityStepper";
 
+/**
+ * The mini-cart. Deliberately a summary, not a second cart page — quantity and
+ * removal only, with everything else (promo codes, save-for-later) living at
+ * /cart. Totals come from the same `computeCartTotals` the full page uses.
+ */
 export function CartSheet() {
   const {
     cartCount,
@@ -20,6 +28,7 @@ export function CartSheet() {
     decrementItem,
     incrementItem,
     totalPrice,
+    promoCode,
     isCartOpen,
     setCartOpen,
     isHydrated,
@@ -28,6 +37,7 @@ export function CartSheet() {
   // Cart state only exists after localStorage is read, so the badge and totals
   // render as empty on the server pass to keep hydration consistent.
   const count = isHydrated ? cartCount : 0;
+  const totals = computeCartTotals(totalPrice * KOBO_PER_NAIRA, promoCode);
 
   return (
     <Sheet open={isCartOpen} onOpenChange={setCartOpen}>
@@ -42,15 +52,15 @@ export function CartSheet() {
         </Button>
       </SheetTrigger>
 
-      <SheetContent className="overflow-y-auto max-h-screen flex flex-col">
-        <SheetTitle className="flex items-center gap-2 mb-4">
+      <SheetContent className="flex max-h-screen flex-col overflow-y-auto">
+        <SheetTitle className="mb-4 flex items-center gap-2">
           Shopping Cart
           {count > 0 && (
             <Badge variant="secondary">{count} {count === 1 ? "item" : "items"}</Badge>
           )}
         </SheetTitle>
 
-        <div className="flex-1 flex flex-col">
+        <div className="flex flex-1 flex-col">
           {count === 0 ? (
             <EmptyState
               title="Your cart is empty"
@@ -60,55 +70,52 @@ export function CartSheet() {
             />
           ) : (
             <div className="space-y-4">
-              {Object.values(cartDetails ?? {}).map((entry) => (
+              <FreeShippingMeter
+                progressKobo={totals.subtotalKobo - totals.discountKobo}
+                remainingKobo={totals.freeShippingRemainingKobo}
+                qualified={totals.qualifiesForFreeShipping}
+                className="rounded-md border border-border bg-muted/40 p-3"
+              />
+
+              {Object.values(cartDetails).map((entry) => (
                 <div key={entry.id} className="flex items-start gap-4 border-b border-border pb-4">
-                  <Link href={`/product/${entry.id}`}>
+                  <Link
+                    href={`/product/${entry.id}`}
+                    onClick={() => setCartOpen(false)}
+                    className="shrink-0 overflow-hidden rounded-lg bg-muted"
+                  >
                     <Image
-                      src={entry.image as string}
-                      className="h-20 w-20 flex-shrink-0 rounded-lg object-cover bg-muted"
+                      src={entry.image}
                       alt={entry.name}
+                      className="h-20 w-20 object-cover"
                       height={80}
                       width={80}
                     />
                   </Link>
 
-                  <div className="flex-1 min-w-0">
-                    <h6 className="text-sm font-semibold text-foreground line-clamp-2">{entry.name}</h6>
-                    {entry.description && (
-                      <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
-                        {entry.description}
-                      </p>
-                    )}
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">Qty:</span>
-                      <button
-                        onClick={() => decrementItem(entry.id)}
-                        className="h-6 w-6 flex items-center justify-center rounded-l-md bg-secondary hover:bg-secondary/80 text-secondary-foreground text-sm transition-colors"
-                        aria-label="Decrease quantity"
-                      >
-                        −
-                      </button>
-                      <span className="h-6 px-2 flex items-center justify-center bg-muted text-sm font-medium">
-                        {entry.quantity}
-                      </span>
-                      <button
-                        onClick={() => incrementItem(entry.id)}
-                        className="h-6 w-6 flex items-center justify-center rounded-r-md bg-secondary hover:bg-secondary/80 text-secondary-foreground text-sm transition-colors"
-                        aria-label="Increase quantity"
-                      >
-                        +
-                      </button>
-                      <button
-                        onClick={() => removeItem(entry.id)}
-                        className="ml-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
-                        aria-label={`Remove ${entry.name}`}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                    <p className="mt-2 text-sm font-semibold text-foreground">
-                      {formatPrice(entry.price * entry.quantity)}
+                  <div className="min-w-0 flex-1">
+                    <h6 className="line-clamp-2 text-sm font-semibold text-foreground">
+                      <Link href={`/product/${entry.id}`} onClick={() => setCartOpen(false)}>
+                        {entry.name}
+                      </Link>
+                    </h6>
+                    <p className="mt-0.5 font-mono text-xs tabular-nums text-muted-foreground">
+                      {formatPrice(entry.price)} each
                     </p>
+
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <QuantityStepper
+                        quantity={entry.quantity}
+                        label={entry.name}
+                        onIncrement={() => incrementItem(entry.id)}
+                        onDecrement={() => decrementItem(entry.id)}
+                        onRemove={() => removeItem(entry.id)}
+                        className="scale-90 origin-left"
+                      />
+                      <p className="font-mono text-sm font-semibold tabular-nums text-foreground">
+                        {formatPrice(entry.price * entry.quantity)}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -117,15 +124,28 @@ export function CartSheet() {
         </div>
 
         {count > 0 && (
-          <div className="mt-auto pt-4 space-y-3">
+          <div className="mt-auto space-y-3 pt-4">
             <Separator />
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Subtotal</span>
-              <span className="text-base font-semibold text-foreground">{formatPrice(totalPrice)}</span>
+              <span className="font-mono text-base font-semibold tabular-nums text-foreground">
+                {formatMinor(totals.subtotalKobo)}
+              </span>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Delivery{" "}
+              {totals.shippingKobo === 0 ? (
+                <span className="font-semibold text-success">free</span>
+              ) : (
+                <span className="font-mono">{formatMinor(totals.shippingKobo)}</span>
+              )}{" "}
+              · calculated in full at checkout
+            </p>
             <CheckoutButton className="w-full" />
             <Button variant="outline" className="w-full" asChild>
-              <Link href="/products">Continue Shopping</Link>
+              <Link href="/cart" onClick={() => setCartOpen(false)}>
+                View cart &amp; edit
+              </Link>
             </Button>
           </div>
         )}
