@@ -1,48 +1,48 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import PageContainer from "@/components/layout/PageContainer";
 import type { ReactNode } from "react";
-import { User, Package, MapPin } from "lucide-react";
+import { AccountNav } from "./AccountNav";
 
-const sidebarLinks = [
-  { label: "Overview", href: "/account", icon: User },
-  { label: "Orders", href: "/account/orders", icon: Package },
-  { label: "Addresses", href: "/account/addresses", icon: MapPin },
-];
+function initialsOf(name?: string | null, email?: string | null) {
+  const source = name?.trim() || email || "?";
+  const parts = source.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return source.slice(0, 2).toUpperCase();
+}
 
 export default async function AccountLayout({ children }: { children: ReactNode }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
+  const { name, email } = session.user;
+
   return (
-    <PageContainer>
-      <div className="lg:grid lg:grid-cols-4 lg:gap-8">
+    // Own container instead of PageContainer: account pages want a roomier gap
+    // below the sticky h-16 navbar than the shared py-6 default provides.
+    <div className="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-8 lg:pt-12">
+      <div className="lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-10">
         {/* Sidebar */}
-        <aside className="mb-8 lg:mb-0 lg:col-span-1">
-          <div className="rounded-lg border border-border bg-card p-4">
-            <div className="mb-4 px-2">
-              <p className="font-semibold text-foreground truncate">{session.user.name ?? "Account"}</p>
-              <p className="text-xs text-muted-foreground truncate">{session.user.email}</p>
+        <aside className="mb-8 lg:mb-0">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm lg:sticky lg:top-24">
+            <div className="relative border-b border-border px-5 pb-5 pt-6">
+              <div aria-hidden className="absolute inset-x-0 top-0 h-1 bg-gradient-brand" />
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-brand text-sm font-bold text-white">
+                  {initialsOf(name, email)}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-foreground">{name ?? "Account"}</p>
+                  <p className="truncate text-xs text-muted-foreground">{email}</p>
+                </div>
+              </div>
             </div>
-            <nav className="space-y-1">
-              {sidebarLinks.map(({ label, href, icon: Icon }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                >
-                  <Icon className="h-4 w-4 flex-shrink-0" />
-                  {label}
-                </Link>
-              ))}
-            </nav>
+            <AccountNav />
           </div>
         </aside>
 
         {/* Main content */}
-        <main className="lg:col-span-3">{children}</main>
+        <main className="min-w-0">{children}</main>
       </div>
-    </PageContainer>
+    </div>
   );
 }

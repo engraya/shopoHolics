@@ -24,7 +24,7 @@ export default function Footer() {
             </p>
             <div className="flex items-center gap-3 mt-2">
               <a
-                href="https://github.com"
+                href="https://github.com/engraya/shopoHolics"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub"
@@ -74,10 +74,7 @@ export default function Footer() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2024 Shopoholics™. All rights reserved.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Built with Next.js &amp; Sanity
+            © {new Date().getFullYear()} Shopoholics™. All rights reserved.
           </p>
         </div>
       </div>

@@ -62,10 +62,20 @@ export async function POST(req: Request) {
       );
     }
 
+    // The catalogue serves dummyjson ids, but order_items.productId points at
+    // the DB products table (cuid keys). Resolve by slug; a product missing
+    // from the DB degrades to null rather than violating the FK — the line
+    // still carries its own name/price/image snapshot.
+    const dbProducts = await db.product.findMany({
+      where: { slug: { in: ids } },
+      select: { id: true, slug: true },
+    });
+    const dbIdBySlug = new Map(dbProducts.map((p) => [p.slug, p.id]));
+
     const lines = products.map((product) => {
       const p = product!;
       return {
-        productId: p._id,
+        productId: dbIdBySlug.get(p.slug) ?? null,
         slug: p.slug,
         name: p.name,
         imageUrl: p.images[0] ?? "",
