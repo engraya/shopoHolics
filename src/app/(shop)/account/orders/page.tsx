@@ -31,14 +31,14 @@ export default async function OrdersPage() {
             <OrderCard
               key={order.id}
               id={order.id}
-              totalCents={order.totalCents}
+              totalCents={Number(order.totalCents)}
               status={order.status}
               createdAt={order.createdAt.toISOString()}
               items={order.items.map((i) => ({
                 id: i.id,
                 name: i.name,
                 quantity: i.quantity,
-                priceCents: i.priceCents,
+                priceCents: Number(i.priceCents),
               }))}
             />
           ))}

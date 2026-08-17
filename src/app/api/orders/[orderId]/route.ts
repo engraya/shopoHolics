@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { serializeOrder } from "@/lib/orders/serialize";
 
 export async function GET(
   _req: Request,
@@ -23,5 +24,5 @@ export async function GET(
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
-  return NextResponse.json(order);
+  return NextResponse.json(serializeOrder(order));
 }

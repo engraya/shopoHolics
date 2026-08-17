@@ -1,22 +1,22 @@
 export interface Product {
   _id: string;
   images: string[];
+  /** Whole Naira. */
   price: number;
   slug: string;
   categoryName: string;
   name: string;
   description: string;
-  price_id: string;
 }
 
 export interface ProductSummary {
   _id: string;
   imageUrl: string;
+  /** Whole Naira. */
   price: number;
   slug: string;
   categoryName: string;
   name: string;
-  price_id: string;
 }
 
 export interface Category {
@@ -25,18 +25,24 @@ export interface Category {
   imageUrl: string;
 }
 
+/** A product as it sits in the cart. `id` is the product slug, so cart links resolve. */
 export interface CartItem {
+  id: string;
   name: string;
   description: string;
+  /** Whole Naira. */
   price: number;
-  currency: string;
   image: string;
-  price_id: string;
+}
+
+export interface CartEntry extends CartItem {
+  quantity: number;
 }
 
 export interface Order {
   id: string;
-  stripeSessionId: string;
+  paystackReference: string;
+  paystackTransactionId: string | null;
   status: string;
   totalCents: number;
   subtotalCents: number;
@@ -54,8 +60,7 @@ export interface Order {
 export interface OrderItem {
   id: string;
   orderId: string;
-  sanityProductId: string;
-  priceId: string;
+  productId: string;
   name: string;
   imageUrl: string;
   slug: string;

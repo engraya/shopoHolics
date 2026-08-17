@@ -1,16 +1,12 @@
 import Link from "next/link";
 import { Github } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Logo } from "@/components/ui/Logo";
+import { footerNav } from "@/lib/navigation";
 
 const footerLinks = {
-  shop: [
-    { name: "All Products", href: "/products" },
-    { name: "Categories", href: "/categories" },
-    { name: "Newest Arrivals", href: "/newest" },
-  ],
-  company: [
-    { name: "Reviews", href: "/reviews" },
-  ],
+  shop: footerNav("shop"),
+  company: footerNav("company"),
 };
 
 export default function Footer() {
@@ -20,15 +16,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           {/* Brand column */}
           <div className="flex flex-col gap-3">
-            <Link href="/" className="font-bold text-lg tracking-tight text-foreground">
-              <span className="text-primary">S</span>hopoholics
+            <Link href="/" aria-label="Shopoholics — home" className="self-start rounded-md">
+              <Logo markClassName="h-8 w-8" />
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
               Premium products, fast checkout, and a shopping experience you&apos;ll love.
             </p>
             <div className="flex items-center gap-3 mt-2">
               <a
-                href="https://github.com"
+                href="https://github.com/engraya/shopoHolics"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub"
@@ -78,10 +74,7 @@ export default function Footer() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2024 Shopoholics™. All rights reserved.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Built with Next.js &amp; Sanity
+            © {new Date().getFullYear()} Shopoholics™. All rights reserved.
           </p>
         </div>
       </div>

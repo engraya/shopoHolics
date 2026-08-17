@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatPrice } from "@/lib/utils";
+import { formatMinor } from "@/lib/utils";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { Package } from "lucide-react";
 
@@ -57,7 +57,7 @@ export function OrderCard({ id, totalCents, status, createdAt, items }: OrderCar
 
       <div className="mt-4 flex items-center justify-between">
         <span className="text-xs text-muted-foreground">{items.length} item{items.length !== 1 ? "s" : ""}</span>
-        <span className="font-semibold text-foreground">{formatPrice(totalCents)}</span>
+        <span className="font-semibold text-foreground">{formatMinor(totalCents)}</span>
       </div>
     </Link>
   );

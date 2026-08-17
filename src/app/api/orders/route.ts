@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { serializeOrder } from "@/lib/orders/serialize";
 
 export async function GET() {
   const session = await auth();
@@ -14,5 +15,5 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(orders);
+  return NextResponse.json(orders.map(serializeOrder));
 }

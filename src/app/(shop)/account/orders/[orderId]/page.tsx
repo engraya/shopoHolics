@@ -34,7 +34,7 @@ function ShippingAddressBlock({ data }: { data: unknown }) {
   );
 }
 import { OrderStatusBadge } from "@/features/orders/components/OrderStatusBadge";
-import { formatPrice } from "@/lib/utils";
+import { formatMinor } from "@/lib/utils";
 import Link from "next/link";
 import { ArrowLeft, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -56,6 +56,16 @@ export default async function OrderDetailPage({
   });
 
   if (!order) notFound();
+
+  // Money columns are BigInt; the summary rows compare and render them as
+  // numbers, so widen once here rather than at every row.
+  const totals = {
+    subtotal: Number(order.subtotalCents),
+    shipping: Number(order.shippingCents),
+    tax: Number(order.taxCents),
+    discount: Number(order.discountCents),
+    total: Number(order.totalCents),
+  };
 
   const shortId = order.id.slice(-8).toUpperCase();
   const date = new Date(order.createdAt).toLocaleDateString("en-US", {
@@ -108,12 +118,12 @@ export default async function OrderDetailPage({
                     <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    {formatPrice(item.priceCents)} × {item.quantity}
+                    {formatMinor(item.priceCents)} × {item.quantity}
                   </p>
                 </div>
               </div>
               <span className="font-semibold text-foreground flex-shrink-0">
-                {formatPrice(item.priceCents * item.quantity)}
+                {formatMinor(Number(item.priceCents) * item.quantity)}
               </span>
             </div>
           ))}
@@ -126,24 +136,35 @@ export default async function OrderDetailPage({
         <Separator />
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Subtotal</span>
-          <span>{formatPrice(order.subtotalCents)}</span>
+          <span>{formatMinor(totals.subtotal)}</span>
         </div>
-        {order.shippingCents > 0 && (
+        {/* Without this row a promo order's figures visibly fail to add up. */}
+        {totals.discount > 0 && (
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Shipping</span>
-            <span>{formatPrice(order.shippingCents)}</span>
+            <span className="text-muted-foreground">
+              Discount{order.promoCode ? ` (${order.promoCode})` : ""}
+            </span>
+            <span className="text-green-600 dark:text-green-400">
+              −{formatMinor(totals.discount)}
+            </span>
           </div>
         )}
-        {order.taxCents > 0 && (
+        {totals.shipping > 0 && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Shipping</span>
+            <span>{formatMinor(totals.shipping)}</span>
+          </div>
+        )}
+        {totals.tax > 0 && (
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Tax</span>
-            <span>{formatPrice(order.taxCents)}</span>
+            <span>{formatMinor(totals.tax)}</span>
           </div>
         )}
         <Separator />
         <div className="flex justify-between font-bold">
           <span>Total</span>
-          <span>{formatPrice(order.totalCents)}</span>
+          <span>{formatMinor(totals.total)}</span>
         </div>
       </div>
 

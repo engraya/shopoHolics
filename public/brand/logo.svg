@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 296 64" role="img" aria-label="Shopoholics">
+  <defs>
+    <linearGradient id="brand" x1="2" y1="0" x2="62" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0284C7"/>
+      <stop offset=".5" stop-color="#0891B2"/>
+      <stop offset="1" stop-color="#0D9488"/>
+    </linearGradient>
+    <mask id="bag">
+      <rect width="64" height="64" fill="#000"/>
+      <path d="M20.892 27.524A11.5 11.5 0 0 1 43.108 27.524" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>
+      <rect x="14" y="25" width="36" height="28" rx="5.5" fill="#fff"/>
+      <path d="M38.1 32.2C37 30.3 34.6 29.6 32 29.6C28.7 29.6 25.9 31.9 25.9 34.6C25.9 37.2 28.2 38.4 32 39C35.8 39.6 38.1 40.8 38.1 43.4C38.1 46.1 35.3 48.4 32 48.4C29.4 48.4 27 47.7 25.9 45.8" fill="none" stroke="#000" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </mask>
+    <style>
+      .wordmark { fill: #0F172A }
+      @media (prefers-color-scheme: dark) { .wordmark { fill: #F8FAFC } }
+    </style>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#brand)"/>
+  <rect width="64" height="64" fill="#fff" mask="url(#bag)"/>
+  <text class="wordmark" x="78" y="44" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="700" letter-spacing="-1">Shopoholics</text>
+</svg>

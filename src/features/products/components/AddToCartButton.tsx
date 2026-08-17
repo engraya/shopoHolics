@@ -1,7 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useShoppingCart } from "use-shopping-cart";
+import { useCart } from "@/features/cart/context/CartContext";
+import { toast } from "sonner";
 import type { CartItem } from "@/types";
 
 interface AddToCartButtonProps extends CartItem {
@@ -9,23 +10,21 @@ interface AddToCartButtonProps extends CartItem {
 }
 
 export default function AddToCartButton({
-  currency,
+  id,
   description,
   image,
   name,
   price,
-  price_id,
   className,
 }: AddToCartButtonProps) {
-  const { addItem, handleCartClick } = useShoppingCart();
-
-  const product = { name, description, price, currency, image, price_id };
+  const { addItem, handleCartClick } = useCart();
 
   return (
     <Button
       className={className}
       onClick={() => {
-        addItem(product);
+        addItem({ id, name, description, price, image });
+        toast.success(`${name} added to cart`);
         handleCartClick();
       }}
     >
