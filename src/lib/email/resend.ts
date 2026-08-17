@@ -2,7 +2,18 @@ import { Resend } from "resend";
 import { OrderConfirmation } from "./templates/OrderConfirmation";
 import { WelcomeEmail } from "./templates/WelcomeEmail";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+// Instantiated lazily — the Resend constructor throws without an API key,
+// which would crash the build when routes importing this module are evaluated.
+let client: Resend | null = null;
+
+function getResend(): Resend {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY is not set — cannot send email.");
+  }
+  client ??= new Resend(process.env.RESEND_API_KEY);
+  return client;
+}
+
 const FROM = process.env.RESEND_FROM_EMAIL ?? "orders@shopoholics.com";
 
 interface OrderConfirmationPayload {
@@ -14,7 +25,7 @@ interface OrderConfirmationPayload {
 }
 
 export async function sendOrderConfirmationEmail(payload: OrderConfirmationPayload) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to: payload.to,
     subject: `Order confirmed — #${payload.orderId.slice(-8).toUpperCase()}`,
@@ -23,7 +34,7 @@ export async function sendOrderConfirmationEmail(payload: OrderConfirmationPaylo
 }
 
 export async function sendWelcomeEmail(to: string, name?: string) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: "Welcome to Shopoholics!",
