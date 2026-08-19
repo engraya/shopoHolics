@@ -1,8 +1,10 @@
 import PageContainer from "@/components/layout/PageContainer";
 import { getProductBySlug, getAllProductSlugs, PRODUCT_DETAIL_REVALIDATE } from "@/lib/api/queries";
 import { formatPrice } from "@/lib/utils";
+import { db } from "@/lib/db";
 import ImageGallery from "@/features/products/components/ImageGallery";
 import AddToCartButton from "@/features/products/components/AddToCartButton";
+import { ProductReviews, type ProductRatingData } from "@/features/reviews/components/ProductReviews";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { StarRating } from "@/components/ui/StarRating";
 import { Truck } from "lucide-react";
@@ -15,12 +17,41 @@ export async function generateStaticParams() {
   return slugs.map(({ slug }) => ({ slug }));
 }
 
+/**
+ * The catalogue renders from dummyjson, but reviews hang off the mirrored
+ * Prisma row (Review.productId is its cuid). Degrades to null so a build
+ * without DB access — or an unseeded product — still renders the page.
+ */
+async function getDbProduct(slug: string): Promise<ProductRatingData | null> {
+  try {
+    return await db.product.findUnique({
+      where: { slug },
+      select: {
+        id: true,
+        ratingAvg: true,
+        ratingCount: true,
+        rating1: true,
+        rating2: true,
+        rating3: true,
+        rating4: true,
+        rating5: true,
+      },
+    });
+  } catch (err) {
+    console.error("Product rating lookup failed:", err);
+    return null;
+  }
+}
+
 export default async function ProductPage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const product = await getProductBySlug(params.slug);
+  const [product, dbProduct] = await Promise.all([
+    getProductBySlug(params.slug),
+    getDbProduct(params.slug),
+  ]);
 
   if (!product) {
     notFound();
@@ -66,12 +97,21 @@ export default async function ProductPage({
 
             <div className="mt-4">
               <h3 className="sr-only">Reviews</h3>
-              <div className="flex items-center gap-3">
-                <StarRating rating={4} />
-                <p className="text-sm font-medium text-primary hover:text-primary/80 cursor-pointer">
-                  117 reviews
-                </p>
-              </div>
+              {dbProduct ? (
+                <div className="flex items-center gap-3">
+                  <StarRating rating={Math.round(dbProduct.ratingAvg)} />
+                  <a
+                    href="#reviews"
+                    className="text-sm font-medium text-primary hover:text-primary/80"
+                  >
+                    {dbProduct.ratingCount > 0
+                      ? `${dbProduct.ratingCount} review${dbProduct.ratingCount === 1 ? "" : "s"}`
+                      : "No reviews yet"}
+                  </a>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No reviews yet</p>
+              )}
             </div>
 
             <div className="mt-8">
@@ -98,6 +138,9 @@ export default async function ProductPage({
               <div className="mt-2">
                 <p className="text-sm text-muted-foreground">{product.categoryName}</p>
               </div>
+            </div>
+            <div className="mt-16 border-t border-border pt-10">
+              <ProductReviews slug={params.slug} product={dbProduct} />
             </div>
           </div>
         </div>

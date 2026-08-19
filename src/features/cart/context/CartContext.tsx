@@ -237,6 +237,9 @@ interface CartContextValue {
   setPromoCode: (code: string) => void;
   isCartOpen: boolean;
   setCartOpen: (open: boolean) => void;
+  /** Lives here (not in CheckoutButton) so the gate outlives the cart sheet's unmount. */
+  isCheckoutGateOpen: boolean;
+  setCheckoutGateOpen: (open: boolean) => void;
   /** Opens the cart sheet — replaces use-shopping-cart's handleCartClick. */
   handleCartClick: () => void;
   /** False until localStorage has been read; gate cart-dependent UI on it. */
@@ -254,6 +257,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [promoCode, setPromoCodeState] = useState("");
   const [isHydrated, setIsHydrated] = useState(false);
   const [isCartOpen, setCartOpen] = useState(false);
+  const [isCheckoutGateOpen, setCheckoutGateOpen] = useState(false);
 
   useEffect(() => {
     dispatch({
@@ -345,6 +349,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setPromoCode,
       isCartOpen,
       setCartOpen,
+      isCheckoutGateOpen,
+      setCheckoutGateOpen,
       handleCartClick,
       isHydrated,
     }),
@@ -367,6 +373,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       promoCode,
       setPromoCode,
       isCartOpen,
+      isCheckoutGateOpen,
       handleCartClick,
       isHydrated,
     ]
