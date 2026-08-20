@@ -8,6 +8,14 @@
 
 # testing
 /coverage
+/test-results
+/playwright-report
+/.playwright
+/blob-report
+
+# local debug helpers (forge auth sessions — never commit)
+*.tmp.mjs
+mint-session.tmp.mjs
 
 # next.js
 /.next/
