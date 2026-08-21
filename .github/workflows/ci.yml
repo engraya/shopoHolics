@@ -16,6 +16,29 @@ jobs:
           node-version: 22
           cache: npm
 
+      # Guard: a bloated config file is the signature of an appended obfuscated
+      # payload (see the postcss.config.js incident). Configs should be tiny.
+      - name: Guard against oversized config files
+        run: |
+          max=8192
+          fail=0
+          for f in postcss.config.* next.config.* tailwind.config.* *.config.js *.config.mjs *.config.cjs; do
+            [ -f "$f" ] || continue
+            size=$(wc -c < "$f")
+            if [ "$size" -gt "$max" ]; then
+              echo "::error file=$f::Config file $f is $size bytes (> $max). Inspect for injected/obfuscated code."
+              fail=1
+            fi
+          done
+          exit $fail
+
+      - name: Guard against committed secrets
+        run: |
+          if git ls-files --error-unmatch .env >/dev/null 2>&1; then
+            echo "::error::.env is tracked in git. Remove it and rotate any exposed secrets."
+            exit 1
+          fi
+
       - name: Install dependencies
         run: npm ci
 
@@ -25,9 +48,43 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Test
+        run: npm run test
+
       - name: Build
         run: npm run build
         env:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
           AUTH_SECRET: ci-only-dummy-secret
           NEXT_TELEMETRY_DISABLED: "1"
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run smoke tests
+        run: npm run e2e
+        env:
+          DATABASE_URL: postgresql://e2e:e2e@localhost:5432/e2e
+          AUTH_SECRET: e2e-only-dummy-secret
+          NEXT_TELEMETRY_DISABLED: "1"
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
