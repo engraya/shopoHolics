@@ -23,6 +23,6 @@ describe("formatMinor", () => {
   });
 
   it("accepts a bigint straight from Prisma", () => {
-    expect(formatMinor(150_000n)).toBe(formatPrice(1500));
+    expect(formatMinor(BigInt(150_000))).toBe(formatPrice(1500));
   });
 });

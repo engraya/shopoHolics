@@ -10,7 +10,7 @@ const item = {
   name: "Essence Mascara",
   imageUrl: "https://cdn.example/1.jpg",
   slug: "42",
-  priceCents: 150_000n,
+  priceCents: BigInt(150_000),
   quantity: 2,
 } as unknown as OrderItem;
 
@@ -18,11 +18,11 @@ const order = {
   id: "ord_1",
   paystackReference: "shp_abc",
   status: "PAID",
-  subtotalCents: 300_000n,
-  shippingCents: 0n,
-  taxCents: 0n,
-  discountCents: 50_000n,
-  totalCents: 250_000n,
+  subtotalCents: BigInt(300_000),
+  shippingCents: BigInt(0),
+  taxCents: BigInt(0),
+  discountCents: BigInt(50_000),
+  totalCents: BigInt(250_000),
   currency: "NGN",
   items: [item],
 } as unknown as Order & { items: OrderItem[] };
