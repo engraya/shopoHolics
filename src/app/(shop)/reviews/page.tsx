@@ -20,11 +20,37 @@ function formatDate(date: Date) {
   });
 }
 
+type ReviewsData = {
+  summary: Awaited<ReturnType<typeof getGlobalRatingSummary>>;
+  latest: Awaited<ReturnType<typeof getLatestReviews>>;
+};
+
+const EMPTY_SUMMARY: ReviewsData["summary"] = {
+  total: 0,
+  average: 0,
+  breakdown: [5, 4, 3, 2, 1].map((stars) => ({ stars, count: 0, pct: 0 })),
+};
+
+/**
+ * This page is prerendered at build time, where the database may be
+ * unreachable (CI builds, cold deploys). Degrade to the empty state rather
+ * than failing the build; ISR re-fetches once the DB is available.
+ */
+async function loadReviews(): Promise<ReviewsData> {
+  try {
+    const [summary, latest] = await Promise.all([
+      getGlobalRatingSummary(),
+      getLatestReviews(10),
+    ]);
+    return { summary, latest };
+  } catch (err) {
+    console.error("Reviews lookup failed:", err);
+    return { summary: EMPTY_SUMMARY, latest: [] };
+  }
+}
+
 async function ReviewsPage() {
-  const [summary, latest] = await Promise.all([
-    getGlobalRatingSummary(),
-    getLatestReviews(10),
-  ]);
+  const { summary, latest } = await loadReviews();
 
   return (
     <PageContainer>
